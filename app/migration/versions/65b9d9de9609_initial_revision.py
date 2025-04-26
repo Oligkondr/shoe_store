@@ -1,8 +1,8 @@
 """Initial revision
 
-Revision ID: 189e0672aff5
+Revision ID: 65b9d9de9609
 Revises: 
-Create Date: 2025-04-24 14:42:05.527043
+Create Date: 2025-04-26 09:16:07.081915
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '189e0672aff5'
+revision: str = '65b9d9de9609'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -48,26 +48,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('colors',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('sizes',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('ru', sa.String(), nullable=False),
-    sa.Column('eu', sa.String(), nullable=False),
-    sa.Column('us_man', sa.String(), nullable=False),
-    sa.Column('us_woman', sa.String(), nullable=False),
-    sa.Column('inch', sa.String(), nullable=False),
-    sa.Column('cm', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('users',
+    op.create_table('clients',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
@@ -79,6 +60,21 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('phone')
+    )
+    op.create_table('colors',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('sizes',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('ru', sa.String(), nullable=False),
+    sa.Column('cm', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('base_color_color',
     sa.Column('base_color_id', sa.Integer(), nullable=False),
@@ -100,51 +96,44 @@ def upgrade() -> None:
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.SmallInteger(), nullable=False),
-    sa.Column('amount', sa.Integer(), server_default=sa.text('0'), nullable=False),
+    sa.Column('price', sa.Integer(), server_default=sa.text('0'), nullable=False),
     sa.Column('approved_at', sa.Date(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['client_id'], ['clients.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('model_colors',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('model_id', sa.Integer(), nullable=False),
     sa.Column('color_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['color_id'], ['colors.id'], ),
     sa.ForeignKeyConstraint(['model_id'], ['models.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('images',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('model_color_id', sa.Integer(), nullable=False),
-    sa.Column('path', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
-    sa.ForeignKeyConstraint(['model_color_id'], ['model_colors.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('model_color_id', sa.Integer(), nullable=False),
     sa.Column('size_id', sa.Integer(), nullable=False),
-    sa.Column('qty', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Integer(), server_default=sa.text('0'), nullable=False),
+    sa.Column('quantity', sa.SmallInteger(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['model_color_id'], ['model_colors.id'], ),
     sa.ForeignKeyConstraint(['size_id'], ['sizes.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_table('order_items',
+    op.create_table('order_products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.SmallInteger(), nullable=False),
-    sa.Column('amount', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Integer(), server_default=sa.text('0'), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ),
@@ -157,16 +146,15 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_table('order_items')
+    op.drop_table('order_products')
     op.drop_table('products')
-    op.drop_table('images')
     op.drop_table('model_colors')
     op.drop_table('orders')
     op.drop_table('models')
     op.drop_table('base_color_color')
-    op.drop_table('users')
     op.drop_table('sizes')
     op.drop_table('colors')
+    op.drop_table('clients')
     op.drop_table('categories')
     op.drop_table('base_colors')
     op.drop_table('admins')

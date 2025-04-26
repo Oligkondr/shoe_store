@@ -6,7 +6,7 @@ from app.database import Base, int_pk
 from datetime import date
 
 
-class User(Base):
+class Client(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
@@ -23,39 +23,37 @@ class Admin(Base):
     phone: Mapped[str] = mapped_column(String[10], unique=True, nullable=False)
     name = Mapped[str]
     surname = Mapped[str]
+    patronymic = Mapped[str]
     is_super: Mapped[bool] = mapped_column(nullable=False, default=False)
 
 
 class Order(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'), nullable=False)
     status_id: Mapped[int] = mapped_column(SmallInteger, nullable=False)
-    amount: Mapped[int] = mapped_column(server_default=text("0"))
+    price: Mapped[int] = mapped_column(server_default=text("0"))
     approved_at: Mapped[date] = mapped_column(Date, nullable=False)
 
 
-class OrderItem(Base):
+class OrderProduct(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
     order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), nullable=False)
     quantity: Mapped[int] = mapped_column(SmallInteger)
-    amount: Mapped[int]
+    price: Mapped[int] = mapped_column(server_default=text("0"))
 
 
 class Product(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     model_color_id: Mapped[int] = mapped_column(ForeignKey('modelcolors.id'), nullable=False)
     size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'), nullable=False)
-    qty: Mapped[int]
+    price: Mapped[int] = mapped_column(server_default=text("0"))
+    quantity: Mapped[int] = mapped_column(SmallInteger)
 
 
 class Size(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     ru: Mapped[str] = mapped_column(String[6], nullable=False)
-    eu: Mapped[str] = mapped_column(String[6], nullable=False)
-    us_man: Mapped[str] = mapped_column(String[6], nullable=False)
-    us_woman: Mapped[str] = mapped_column(String[6], nullable=False)
-    inch: Mapped[str] = mapped_column(String[6], nullable=False)
     cm: Mapped[str] = mapped_column(String[6], nullable=False)
 
 
@@ -63,12 +61,7 @@ class ModelColor(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     model_id: Mapped[int] = mapped_column(ForeignKey('models.id'), nullable=False)
     color_id: Mapped[int] = mapped_column(ForeignKey('colors.id'), nullable=False)
-
-
-class Image(Base):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    model_color_id: Mapped[int] = mapped_column(ForeignKey('modelcolors.id'), nullable=False)
-    path: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=False)
 
 
 class Model(Base):
