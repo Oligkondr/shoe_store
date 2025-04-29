@@ -1,3 +1,4 @@
+import bcrypt
 from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime, func
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
@@ -6,9 +7,17 @@ from app.database import Base
 from datetime import datetime
 
 
-class Admin(Base):
+class PasswordEncryption:
+    def set_password(self, password):
+        self.password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    def check_password(self, password):
+        return bcrypt.checkpw(password.encode("utf-8"), self.password.encode("utf-8"))
+
+
+class Admin(Base, PasswordEncryption):
     email: Mapped[str] = mapped_column(unique=True)
-    password: Mapped[str] = mapped_column()
+    password: Mapped[str]
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]
@@ -16,9 +25,9 @@ class Admin(Base):
     is_super: Mapped[bool] = mapped_column(default=False)
 
 
-class Client(Base):
+class Client(Base, PasswordEncryption):
     email: Mapped[str] = mapped_column(unique=True)
-    password: Mapped[str]
+    password: Mapped[str] = mapped_column(String)
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]

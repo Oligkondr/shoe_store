@@ -44,13 +44,14 @@ def create_admin(admin: AdminCreateRequest):
     with session_maker() as session:
         new_admin = Admin(
             email=admin.email,
-            password=admin.password,
             phone=admin.phone,
             name=admin.name,
             surname=admin.surname,
             patronymic=admin.patronymic,
             is_super=admin.is_super,
         )
+        new_admin.set_password(admin.password)
+
         session.add(new_admin)
         session.commit()
     return new_admin
