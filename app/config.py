@@ -1,21 +1,13 @@
 import os
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv
 
-
-class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: str
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
-    )
-
-
-settings = Settings()
-
+load_dotenv()
 
 def get_db_url():
-    return (f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASSWORD}@"
-            f"{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+
+    return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"

@@ -1,0 +1,24 @@
+pip freeze > requirements.txt
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+
+alembic revision --autogenerate -m "Initial revision"
+alembic upgrade head
+
+
+{
+    "email": "email2",
+    "password":  "password2",
+    "phone":  "phone2",
+    "name":  "name2",
+    "surname":  "surname",
+    "patronymic": "patronymic2",
+    "is_super": true
+}
+
+
+import os
+>>> import binascii
+>>> binascii.hexlify(os.urandom(24))

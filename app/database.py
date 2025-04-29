@@ -1,32 +1,36 @@
 from datetime import datetime
 from typing import Annotated
 
-from sqlalchemy import func
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
+from sqlalchemy import func, create_engine, DateTime
+from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, sessionmaker
 
 from app.config import get_db_url
 
 DATABASE_URL = get_db_url()
 
-engine = create_async_engine(DATABASE_URL)
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+engine = create_engine(DATABASE_URL)
+session_maker = sessionmaker(engine, expire_on_commit=False)
 
 
-# настройка аннотаций
-int_pk = Annotated[int, mapped_column(primary_key=True)]
-# created_at = Annotated[datetime, mapped_column(server_default=func.now())]
-# updated_at = Annotated[datetime, mapped_column(server_default=func.now(), onupdate=datetime.now)]
-# str_uniq = Annotated[str, mapped_column(unique=True, nullable=False)]
-# str_null_true = Annotated[str, mapped_column(nullable=True)]
-
-
-class Base(AsyncAttrs, DeclarativeBase):
+class Base(DeclarativeBase):
     __abstract__ = True
 
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        return f"{cls.__name__.lower()}s"
+    id: Mapped[int] = mapped_column(primary_key=True, nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=datetime.now)
+    @declared_attr
+    def __tablename__(cls) -> str:
+        name = cls.__name__[0].lower() + cls.__name__[1:]
+        name = ''.join(['_' + c.lower() if c.isupper() else c for c in name]).lstrip('_')
+
+        if name.endswith(('s', 'x', 'z', 'ch', 'sh')):
+            return name + 'es'
+        elif name.endswith('y'):
+            # Заменяем 'y' на 'ies' (company -> companies)
+            return name[:-1] + 'ies'
+        else:
+            # Добавляем 's' только если нет окончания 's'
+            return name if name.endswith('s') else name + 's'
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                 onupdate=datetime.now)
