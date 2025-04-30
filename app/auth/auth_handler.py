@@ -1,32 +1,53 @@
-import time
-from typing import Dict
+from passlib.context import CryptContext
+from jose import jwt, JWTError
+from datetime import datetime, timedelta, timezone
+from app.config import get_auth_data
+from fastapi import Request, HTTPException, status, Depends
 
-import jwt
-from decouple import config
-
-JWT_SECRET = config("secret")
-JWT_ALGORITHM = config("algorithm")
-
-
-def token_response(token: str):
-    return {
-        "access_token": token
-    }
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def sign_jwt(user_id: str) -> Dict[str, str]:
-    payload = {
-        "user_id": user_id,
-        "expires": time.time() + 600
-    }
-    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-    return token_response(token)
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
 
-def decode_jwt(token: str) -> dict:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def create_access_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=30)
+    to_encode.update({"exp": expire})
+    auth_data = get_auth_data()
+    encode_jwt = jwt.encode(to_encode, auth_data['secret_key'], algorithm=auth_data['algorithm'])
+    return encode_jwt
+
+
+def get_token(request: Request):
+    token = request.headers.get('token')
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Token not found')
+    return token
+
+async def get_current_user(token: str = Depends(get_token)):
     try:
-        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return decoded_token if decoded_token["expires"] >= time.time() else None
-    except:
-        return {}
+        auth_data = get_auth_data()
+        payload = jwt.decode(token, auth_data['secret_key'], algorithms=[auth_data['algorithm']])
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Токен не валидный!')
+
+    expire = payload.get('exp')
+    expire_time = datetime.fromtimestamp(int(expire), tz=timezone.utc)
+    if (not expire) or (expire_time < datetime.now(timezone.utc)):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Токен истек')
+
+    user_id = payload.get('admin_id')
+    # if not user_id:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Не найден ID пользователя')
+    #
+    # user = await UsersDAO.find_one_or_none_by_id(int(user_id))
+    # if not user:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User not found')
+
+    return user_id

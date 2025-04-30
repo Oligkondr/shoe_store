@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 
 
 class AdminCreateRequest(BaseModel):
@@ -11,8 +11,6 @@ class AdminCreateRequest(BaseModel):
     is_super: bool
 
 
-class Item(BaseModel):
-    name: str
-    description: str = None
-    price: float
-    tax: float = None
+class AdminAuthRequest(BaseModel):
+    email: str = Field(..., description="Электронная почта")
+    password: str = Field(..., min_length=5, max_length=50, description="Пароль, от 5 до 50 знаков")

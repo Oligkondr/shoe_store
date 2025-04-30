@@ -1,13 +1,13 @@
 from types import new_class
 
-from fastapi import APIRouter, Body
-from sqlalchemy import create_engine
+from fastapi import APIRouter, HTTPException, status, Depends
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
+from app.auth.auth_handler import create_access_token, verify_password, get_current_user
 from app.database import session_maker
-from app.requests import AdminCreateRequest, Item
+from app.requests import AdminCreateRequest, AdminAuthRequest
 
-from app.auth.auth_handler import sign_jwt
 from app.models import Admin
 from app.config import get_db_url
 
@@ -35,11 +35,11 @@ def get_test():
 
 
 @admins_router.post('/test', summary='Test post request')
-def post_test(item: Item):
-    return item
+def post_test(admin: Admin = Depends(get_current_user)):
+    return {'message': admin}
 
 
-@admins_router.post("/signup", summary='Create new admin')
+@admins_router.post("/register", summary='Create new admin')
 def create_admin(admin: AdminCreateRequest):
     with session_maker() as session:
         new_admin = Admin(
@@ -55,3 +55,22 @@ def create_admin(admin: AdminCreateRequest):
         session.add(new_admin)
         session.commit()
     return new_admin
+
+
+@admins_router.post("/login", summary='Login admin')
+def login_admin(admin: AdminAuthRequest):
+    with session_maker() as session:
+        stmt = select(Admin).where(Admin.email == admin.email)
+        result = session.execute(stmt)
+        admin_db = result.scalar_one_or_none()
+
+    if admin_db is None or verify_password(plain_password=admin.password, hashed_password=admin_db.password) is False:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail='Неверная почта или пароль')
+
+    access_token = create_access_token({
+        'admin_id': admin_db.id,
+        'is_admin': True,
+    })
+
+    return {'access_token': access_token}
