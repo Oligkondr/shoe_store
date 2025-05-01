@@ -31,7 +31,7 @@ class Client(Base, PasswordEncryption):
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]
-    account: Mapped[int] = mapped_column(server_default=text("0"))
+    account: Mapped[int] = mapped_column(nullable=True)
 
     orders = relationship("Order", back_populates='client')
 

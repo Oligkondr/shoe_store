@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
-from app.auth.auth_handler import create_access_token, verify_password, get_current_user
+from app.auth.auth_handler import create_access_token, verify_password, get_current_admin
 from app.database import session_maker
 from app.requests import AdminCreateRequest, AdminAuthRequest
 
@@ -35,7 +35,7 @@ def get_test():
 
 
 @admins_router.post('/test', summary='Test post request')
-def post_test(admin: Admin = Depends(get_current_user)):
+def post_test(admin: Admin = Depends(get_current_admin)):
     return {'message': admin}
 
 
@@ -54,7 +54,7 @@ def create_admin(admin: AdminCreateRequest):
 
         session.add(new_admin)
         session.commit()
-    return new_admin
+    return {'success': True}
 
 
 @admins_router.post("/login", summary='Login admin')
@@ -69,8 +69,8 @@ def login_admin(admin: AdminAuthRequest):
                             detail='Неверная почта или пароль')
 
     access_token = create_access_token({
-        'admin_id': admin_db.id,
-        'is_admin': True,
+        'id': admin_db.id,
+        'type': 'admin',
     })
 
     return {'access_token': access_token}
