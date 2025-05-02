@@ -1,0 +1,114 @@
+from PyQt5.QtWidgets import (
+    QWidget,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QStackedWidget,
+    QFormLayout,
+    QVBoxLayout,
+    QSpacerItem,
+    QHBoxLayout,
+    QGraphicsDropShadowEffect,
+)
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor
+
+from os import path
+
+from ..utils import get_absolute_path, clear_layout
+from ..layouts import LoginFormLayout, RegistrationFormLayout
+
+
+class LoginWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.form_container = QWidget()
+        self.close_button = QPushButton()
+        
+        # Cохранение позиции для перемещения
+        self.old_window_pos = None
+
+        self.init_ui()
+        self.show_login_form()
+
+    def init_ui(self):
+        # Подключение файла стилей
+        style_file_path = get_absolute_path(__file__, "../styles/login_style.qss")
+        with open(style_file_path, "r") as file:
+            style = file.read()
+            self.setStyleSheet(style)
+
+        # Настройка и расположение элементов окна
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+
+        window_layout = QHBoxLayout()
+        window_layout.setSpacing(0)
+        window_layout.setContentsMargins(20, 20, 20, 20)
+        
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setOffset(0, 0)
+        shadow.setBlurRadius(20)
+        shadow.setColor(QColor(0, 0, 0, 125))
+
+        shadow_container = QWidget()
+        shadow_container.setGraphicsEffect(shadow)
+        
+        shadow_container_layout = QHBoxLayout()
+        shadow_container_layout.setSpacing(0)
+        shadow_container_layout.setContentsMargins(0, 0, 0, 0)
+
+        image_container = QWidget()
+        image_container.setObjectName("login-image")
+        image_container.setMinimumWidth(300)
+
+        ui_container = QWidget()
+        ui_container.setMinimumWidth(300)
+
+        ui_container_layout = QVBoxLayout()
+        ui_container_layout.setContentsMargins(30, 30, 30, 30)
+
+        ui_container_layout.addStretch(1)
+        ui_container_layout.addWidget(self.form_container)
+        ui_container_layout.addStretch(1)
+        ui_container.setLayout(ui_container_layout)
+
+        shadow_container_layout.addWidget(image_container, 1)
+        shadow_container_layout.addWidget(ui_container, 1)
+        shadow_container.setLayout(shadow_container_layout)
+        
+        window_layout.addWidget(shadow_container)
+        self.setLayout(window_layout)
+        
+        self.close_button.setText("x")
+        self.close_button.setParent(self)
+        self.close_button.setGeometry(20, 20, 40, 40)
+        self.close_button.clicked.connect(self.close)
+
+    def render_form_layout(self, new_layout):
+        curr_layout = self.form_container.layout()
+        if curr_layout is not None:
+            clear_layout(curr_layout)
+            QWidget().setLayout(curr_layout)
+        self.form_container.setLayout(new_layout)
+
+    def show_registration_form(self):
+        self.render_form_layout(RegistrationFormLayout(None, self.show_login_form))
+
+    def show_login_form(self):
+        self.render_form_layout(LoginFormLayout(None, self.show_registration_form))
+    
+    # Перемещение окна
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.old_window_pos = event.globalPos()
+
+    def mouseMoveEvent(self, event):
+        if self.old_window_pos:
+            delta = event.globalPos() - self.old_window_pos
+            self.move(self.pos() + delta)
+            self.old_window_pos = event.globalPos()
+
+    def mouseReleaseEvent(self, event):
+        self.old_window_pos = None
