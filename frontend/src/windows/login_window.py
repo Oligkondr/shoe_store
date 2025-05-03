@@ -10,13 +10,12 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QGraphicsDropShadowEffect,
 )
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor
-
-from os import path
+from PyQt5.QtCore import Qt, QSize, QTimer
+from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
 from ..utils import get_absolute_path, clear_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout
+from ..widgets import OverlayWidget
 
 
 class LoginWindow(QWidget):
@@ -25,7 +24,8 @@ class LoginWindow(QWidget):
 
         self.form_container = QWidget()
         self.close_button = QPushButton()
-        
+        self.overlay = OverlayWidget()
+
         # Cохранение позиции для перемещения
         self.old_window_pos = None
 
@@ -46,7 +46,7 @@ class LoginWindow(QWidget):
         window_layout = QHBoxLayout()
         window_layout.setSpacing(0)
         window_layout.setContentsMargins(20, 20, 20, 20)
-        
+
         shadow = QGraphicsDropShadowEffect()
         shadow.setOffset(0, 0)
         shadow.setBlurRadius(20)
@@ -54,7 +54,7 @@ class LoginWindow(QWidget):
 
         shadow_container = QWidget()
         shadow_container.setGraphicsEffect(shadow)
-        
+
         shadow_container_layout = QHBoxLayout()
         shadow_container_layout.setSpacing(0)
         shadow_container_layout.setContentsMargins(0, 0, 0, 0)
@@ -67,7 +67,7 @@ class LoginWindow(QWidget):
         ui_container.setMinimumWidth(300)
 
         ui_container_layout = QVBoxLayout()
-        ui_container_layout.setContentsMargins(30, 30, 30, 30)
+        ui_container_layout.setContentsMargins(0, 0, 0, 0)
 
         ui_container_layout.addStretch(1)
         ui_container_layout.addWidget(self.form_container)
@@ -77,13 +77,22 @@ class LoginWindow(QWidget):
         shadow_container_layout.addWidget(image_container, 1)
         shadow_container_layout.addWidget(ui_container, 1)
         shadow_container.setLayout(shadow_container_layout)
-        
+
         window_layout.addWidget(shadow_container)
         self.setLayout(window_layout)
-        
-        self.close_button.setText("x")
-        self.close_button.setParent(self)
-        self.close_button.setGeometry(20, 20, 40, 40)
+
+        self.overlay.setParent(ui_container)
+        self.overlay.hide()
+
+        self.close_button.setObjectName("close-window-btn")
+        self.close_button.setParent(ui_container)
+        self.close_button.setGeometry(252, 28, 20, 20)
+        self.close_button.setIcon(
+            QIcon(get_absolute_path(__file__, "../icons/close1.png"))
+        )
+        self.close_button.setIconSize(QSize(16, 16))
+        self.close_button.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+        self.close_button.setCursor(Qt.PointingHandCursor)
         self.close_button.clicked.connect(self.close)
 
     def render_form_layout(self, new_layout):
@@ -97,8 +106,22 @@ class LoginWindow(QWidget):
         self.render_form_layout(RegistrationFormLayout(None, self.show_login_form))
 
     def show_login_form(self):
-        self.render_form_layout(LoginFormLayout(None, self.show_registration_form))
-    
+        self.render_form_layout(
+            LoginFormLayout(
+                self.show_overlay,
+                self.show_registration_form,
+                self.show_overlay,
+                self.hide_overlay,
+            )
+        )
+
+    def show_overlay(self):
+        self.overlay.resize()
+        self.overlay.show()
+
+    def hide_overlay(self):
+        self.overlay.hide()
+
     # Перемещение окна
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -112,3 +135,8 @@ class LoginWindow(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.old_window_pos = None
+
+    # Для изменения размеров оверлея при изменении размеров окна
+    def resizeEvent(self, event):
+        self.overlay.resize()
+        super().resizeEvent(event)
