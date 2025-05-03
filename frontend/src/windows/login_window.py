@@ -82,7 +82,6 @@ class LoginWindow(QWidget):
         self.setLayout(window_layout)
 
         self.overlay.setParent(ui_container)
-        self.overlay.hide()
 
         self.close_button.setObjectName("close-window-btn")
         self.close_button.setParent(ui_container)
@@ -135,8 +134,3 @@ class LoginWindow(QWidget):
 
     def mouseReleaseEvent(self, event):
         self.old_window_pos = None
-
-    # Для изменения размеров оверлея при изменении размеров окна
-    def resizeEvent(self, event):
-        self.overlay.resize()
-        super().resizeEvent(event)

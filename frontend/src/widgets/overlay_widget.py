@@ -24,6 +24,7 @@ class OverlayWidget(QLabel):
         self.setAlignment(Qt.AlignCenter)
 
         self.move(0, 0)
+        self.hide()
 
     def resize(self):
         if self.parent():
