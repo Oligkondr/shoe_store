@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QIcon
 
+from enum import Enum
+
 from ..utils import (
     get_absolute_path,
     add_class,
@@ -22,6 +24,10 @@ from ..widgets import ClickableWidget, OverlayWidget
 
 
 class LoginFormLayout(QVBoxLayout):
+    class InputName(Enum):
+        EMAIL = 1
+        PASSWORD = 2
+
     def __init__(
         self,
         success_login_handler,
@@ -31,30 +37,24 @@ class LoginFormLayout(QVBoxLayout):
     ):
         super().__init__()
 
-        self.inputs = {
-            "email": QLineEdit(),
-            "password": QLineEdit(),
-        }
-        for name, widget in self.inputs.items():
-            widget.setObjectName(name)
-
-        self.inputs_validity = {
-            "email": None,
-            "password": None,
-        }
-        self.validators = {
-            "email": validate_login_email,
-            "password": validate_login_password,
-        }
-        self.errors = {
-            "email": QLabel(),
-            "password": QLabel(),
-        }
-
         self.success_login_handler = success_login_handler
         self.show_register_form_handler = show_register_form_handler
         self.show_window_overlay = show_window_overlay
         self.hide_window_overlay = hide_window_overlay
+
+        self.inputs = dict()
+        self.errors = dict()
+        self.inputs_validity = dict()
+
+        for input_name in self.InputName:
+            self.inputs[input_name] = QLineEdit()
+            self.errors[input_name] = QLabel()
+            self.inputs_validity[input_name] = None
+
+        self.validators = {
+            self.InputName.EMAIL: validate_login_email,
+            self.InputName.PASSWORD: validate_login_password,
+        }
 
         self.register_btn = QPushButton()
 
@@ -89,22 +89,21 @@ class LoginFormLayout(QVBoxLayout):
         add_class(register_btn_icon, "small-text")
 
         register_btn_layout = QHBoxLayout()
-        register_btn_layout.addWidget(self.register_btn, alignment=Qt.AlignLeft)
+        register_btn_layout.addWidget(self.register_btn)
         register_btn_layout.addWidget(register_btn_icon)
         register_btn_layout.addStretch(1)
 
-        self.inputs["email"].setPlaceholderText("Email")
-        add_class(self.inputs["email"], "text-input")
-        self.inputs["email"].setFixedHeight(30)
+        for input_name in self.InputName:
+            add_class(self.inputs[input_name], "text-input")
+            self.inputs[input_name].setFixedHeight(30)
 
-        add_class(self.errors["email"], "error-text")
-        self.errors["email"].setContentsMargins(0, 2, 0, 0)
-        self.errors["email"].hide()
+            add_class(self.errors[input_name], "error-text")
+            self.errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self.errors[input_name].hide()
 
-        self.inputs["password"].setPlaceholderText("Пароль")
-        self.inputs["password"].setEchoMode(QLineEdit.Password)
-        add_class(self.inputs["password"], "text-input")
-        self.inputs["password"].setFixedHeight(30)
+        self.inputs[self.InputName.EMAIL].setPlaceholderText("Email")
+        self.inputs[self.InputName.PASSWORD].setPlaceholderText("Пароль")
+        self.inputs[self.InputName.PASSWORD].setEchoMode(QLineEdit.Password)
 
         self.password_toggle_btn.setFixedHeight(30)
         self.password_toggle_btn.setFixedWidth(30)
@@ -116,15 +115,11 @@ class LoginFormLayout(QVBoxLayout):
         add_class(self.password_toggle_btn, "password-btn")
         self.password_toggle_btn.setStyleSheet("text-align: right")
 
-        add_class(self.errors["password"], "error-text")
-        self.errors["password"].setContentsMargins(0, 2, 0, 0)
-        self.errors["password"].hide()
-
         password_layout = QHBoxLayout()
-        password_layout.addWidget(self.inputs["password"])
+        password_layout.addWidget(self.inputs[self.InputName.PASSWORD])
         password_layout.addWidget(self.password_toggle_btn)
 
-        add_class(self.login_error, "error-text", "error-text_above")
+        add_class(self.login_error, "error-text")
         self.login_error.setContentsMargins(0, 0, 0, 7)
         self.login_error.hide()
 
@@ -146,11 +141,11 @@ class LoginFormLayout(QVBoxLayout):
         self.addWidget(label)
         self.addLayout(register_btn_layout)
         self.addSpacing(16)
-        self.addWidget(self.inputs["email"])
-        self.addWidget(self.errors["email"])
+        self.addWidget(self.inputs[self.InputName.EMAIL])
+        self.addWidget(self.errors[self.InputName.EMAIL])
         self.addSpacing(10)
         self.addLayout(password_layout)
-        self.addWidget(self.errors["password"])
+        self.addWidget(self.errors[self.InputName.PASSWORD])
         self.addSpacing(30)
         self.addWidget(self.login_error, alignment=Qt.AlignHCenter)
         self.addWidget(self.login_btn)
@@ -158,8 +153,11 @@ class LoginFormLayout(QVBoxLayout):
         self.addWidget(self.employee_login_btn, alignment=Qt.AlignHCenter)
 
     def connect_signals(self):
-        self.inputs["email"].textChanged.connect(self.email_input_handler)
-        self.inputs["password"].textChanged.connect(self.password_input_handler)
+        self.inputs[self.InputName.EMAIL].textChanged.connect(self.email_input_handler)
+        self.inputs[self.InputName.PASSWORD].textChanged.connect(
+            self.password_input_handler
+        )
+
         self.password_toggle_btn.clicked.connect(self.toggle_password_visibility)
 
         self.login_btn.clicked.connect(self.login_btn_handler)
@@ -168,11 +166,11 @@ class LoginFormLayout(QVBoxLayout):
         self.register_btn.clicked.connect(self.show_register_form_handler)
 
     def email_input_handler(self):
-        self.validate_input("email")
+        self.validate_input(self.InputName.EMAIL)
         self.set_login_buttons_disability()
 
     def password_input_handler(self):
-        self.validate_input("password")
+        self.validate_input(self.InputName.PASSWORD)
         self.set_login_buttons_disability()
 
     def login_btn_handler(self):
@@ -201,12 +199,12 @@ class LoginFormLayout(QVBoxLayout):
             self.password_toggle_btn.setIcon(
                 QIcon(get_absolute_path(__file__, "../icons/password_opened.png"))
             )
-            self.inputs["password"].setEchoMode(QLineEdit.Normal)
+            self.inputs[self.InputName.PASSWORD].setEchoMode(QLineEdit.Normal)
         else:
             self.password_toggle_btn.setIcon(
                 QIcon(get_absolute_path(__file__, "../icons/password_closed.png"))
             )
-            self.inputs["password"].setEchoMode(QLineEdit.Password)
+            self.inputs[self.InputName.PASSWORD].setEchoMode(QLineEdit.Password)
 
     def set_login_buttons_disability(self):
         self.login_error.hide()
