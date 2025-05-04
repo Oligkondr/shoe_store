@@ -54,6 +54,7 @@ class LoginWindow(QWidget):
 
         shadow_container = QWidget()
         shadow_container.setGraphicsEffect(shadow)
+        shadow_container.setFixedHeight(530)
 
         shadow_container_layout = QHBoxLayout()
         shadow_container_layout.setSpacing(0)
@@ -61,10 +62,10 @@ class LoginWindow(QWidget):
 
         image_container = QWidget()
         image_container.setObjectName("login-image")
-        image_container.setMinimumWidth(300)
+        image_container.setFixedWidth(350)
 
         ui_container = QWidget()
-        ui_container.setMinimumWidth(300)
+        ui_container.setFixedWidth(350)
 
         ui_container_layout = QVBoxLayout()
         ui_container_layout.setContentsMargins(0, 0, 0, 0)
@@ -85,7 +86,7 @@ class LoginWindow(QWidget):
 
         self.close_button.setObjectName("close-window-btn")
         self.close_button.setParent(ui_container)
-        self.close_button.setGeometry(252, 28, 20, 20)
+        self.close_button.setGeometry(302, 28, 20, 20)
         self.close_button.setIcon(
             QIcon(get_absolute_path(__file__, "../icons/close1.png"))
         )
@@ -102,7 +103,14 @@ class LoginWindow(QWidget):
         self.form_container.setLayout(new_layout)
 
     def show_registration_form(self):
-        self.render_form_layout(RegistrationFormLayout(None, self.show_login_form))
+        self.render_form_layout(
+            RegistrationFormLayout(
+                None,
+                self.show_login_form,
+                self.show_overlay,
+                self.hide_overlay,
+            )
+        )
 
     def show_login_form(self):
         self.render_form_layout(

@@ -1,6 +1,15 @@
 from .gui_utils import clear_layout, add_class, remove_class, toggle_class
 from .os_utils import get_absolute_path
-from .validation_utils import validate_login_email, validate_login_password
+from .validation_utils import (
+    validate_login_email,
+    validate_login_password,
+    validate_registration_email,
+    validate_registration_name,
+    validate_registration_surname,
+    validate_registration_phone,
+    validate_registration_password,
+    validate_registration_password2,
+)
 
 __all__ = [
     "clear_layout",
@@ -10,4 +19,10 @@ __all__ = [
     "get_absolute_path",
     "validate_login_email",
     "validate_login_password",
+    "validate_registration_email",
+    "validate_registration_name",
+    "validate_registration_surname",
+    "validate_registration_phone",
+    "validate_registration_password",
+    "validate_registration_password2",
 ]
