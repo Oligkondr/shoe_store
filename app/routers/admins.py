@@ -1,9 +1,8 @@
 from types import new_class
 
 from fastapi import APIRouter, HTTPException, status, Depends
-from h11 import PRODUCT_ID
 from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker, selectinload, subqueryload, joinedload
+from sqlalchemy.orm import sessionmaker, joinedload
 
 from app.auth.auth_handler import create_access_token, verify_password, get_current_admin
 from app.database import session_maker
@@ -11,7 +10,7 @@ from app.requests import AdminCreateRequest, AdminAuthRequest
 
 from app.models import Admin, Product, ModelColor, Color, Model
 from app.config import get_db_url
-from app.responses.responses import AdminResponse
+from app.responses.responses import AdminLoginResponse, AdminRegisterResponse
 
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -41,7 +40,7 @@ def post_test(admin: Admin = Depends(get_current_admin)):
     return {'message': admin}
 
 
-@admins_router.post("/register", summary='Create new admin')
+@admins_router.post("/register", summary='Create new admin', response_model=AdminRegisterResponse)
 def create_admin(admin: AdminCreateRequest):
     with session_maker() as session:
         new_admin = Admin(
@@ -59,7 +58,7 @@ def create_admin(admin: AdminCreateRequest):
     return {'success': True}
 
 
-@admins_router.post("/login", summary='Login admin', response_model=AdminResponse)
+@admins_router.post("/login", summary='Login admin', response_model=AdminLoginResponse)
 def login_admin(admin: AdminAuthRequest):
     with session_maker() as session:
         stmt = select(Admin).where(Admin.email == admin.email)
