@@ -1,9 +1,10 @@
 import bcrypt
-from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime, func
+from select import select
+from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
-from app.database import Base
+from app.database import Base, session_maker, first_or_create
 from datetime import datetime
 
 
@@ -54,12 +55,26 @@ class Client(Base, PasswordEncryption):
             'account': self.account,
         }
 
+    def get_current_order(self):
+        with session_maker() as session:
+            order_obj = first_or_create(session, Order, None, client_id=self.id, status_id=Order.STATUS_NEW_ID)
+        return order_obj
+
 
 class Order(Base):
+    STATUS_NEW_ID = 0
+    STATUS_PAID_ID = 1
+    STATUS_APPROVED_ID = 2
+    STATUSES = {
+        STATUS_NEW_ID: 'Новый',
+        STATUS_PAID_ID: 'Оплачен',
+        STATUS_APPROVED_ID: 'Отправлен',
+    }
+
     client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
     status_id: Mapped[int] = mapped_column(SmallInteger)
     price: Mapped[int] = mapped_column(server_default=text("0"))
-    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, server_default="NULL")
 
     client = relationship("Client", back_populates="orders")
     order_products = relationship("OrderProduct", back_populates="order")

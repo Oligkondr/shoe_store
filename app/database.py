@@ -34,3 +34,17 @@ class Base(DeclarativeBase):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                                  onupdate=datetime.now)
+
+
+def first_or_create(session, model, defaults=None, **kwargs):
+    instance = session.query(model).filter_by(**kwargs).one_or_none()
+    if instance:
+        return instance
+    else:
+        params = {**kwargs}
+        if defaults:
+            params.update(defaults)
+        instance = model(**params)
+        session.add(instance)
+        session.commit()
+        return instance

@@ -102,7 +102,7 @@ def upgrade() -> None:
     sa.Column('client_id', sa.Integer(), nullable=False),
     sa.Column('status_id', sa.SmallInteger(), nullable=False),
     sa.Column('price', sa.Integer(), server_default=sa.text('0'), nullable=False),
-    sa.Column('approved_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('approved_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
