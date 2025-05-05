@@ -13,6 +13,9 @@ from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRepl
 
 from enum import Enum
 import requests
+import json
+
+from session import session
 
 from ..utils import (
     get_absolute_path,
@@ -52,6 +55,9 @@ class LoginFormLayout(QVBoxLayout):
             self._inputs[input_name] = QLineEdit()
             self._errors[input_name] = QLabel()
             self._inputs_validity[input_name] = None
+        
+        if session.login_email is not None:
+            self._inputs[self._InputName.EMAIL].setText(session.login_email)
 
         self._validators = {
             self._InputName.EMAIL: validate_login_email,
@@ -181,13 +187,15 @@ class LoginFormLayout(QVBoxLayout):
         self._login_error.hide()
         self._show_window_overlay()
 
-        url = "http://127.0.0.1:8000/api/v1/admin/login"
+        url = "http://127.0.0.1:8000/api/v1/login"
         data = {
-            "email": self._inputs[self._InputName.EMAIL],
-            "password": self._inputs[self._InputName.PASSWORD],
+            "email": self._inputs[self._InputName.EMAIL].text(),
+            "password": self._inputs[self._InputName.PASSWORD].text(),
         }
+        
+        y = json.dumps(data)
 
-        response = requests.post(url, data=data)
+        response = requests.post(url, json=y)
         print("Status Code:", response.status_code)
         print("Response Body:", response.text)
 

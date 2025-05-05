@@ -11,6 +11,9 @@ from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QIcon
 
 from enum import Enum
+import requests
+import json
+from session import session
 
 from ..utils import (
     get_absolute_path,
@@ -182,12 +185,16 @@ class RegistrationFormLayout(QVBoxLayout):
     def _connect_signals(self):
         self._back_btn.clicked.connect(self._back_btn_handler)
 
-        self._inputs[self._InputName.EMAIL].textChanged.connect(self._email_input_handler)
+        self._inputs[self._InputName.EMAIL].textChanged.connect(
+            self._email_input_handler
+        )
         self._inputs[self._InputName.NAME].textChanged.connect(self._name_input_handler)
         self._inputs[self._InputName.SURNAME].textChanged.connect(
             self._surname_input_handler
         )
-        self._inputs[self._InputName.PHONE].textChanged.connect(self._phone_input_handler)
+        self._inputs[self._InputName.PHONE].textChanged.connect(
+            self._phone_input_handler
+        )
         self._inputs[self._InputName.PASSWORD].textChanged.connect(
             self._password_input_handler
         )
@@ -238,7 +245,9 @@ class RegistrationFormLayout(QVBoxLayout):
             if self._inputs_validity[self._InputName.PASSWORD2]:
                 self._errors[self._InputName.PASSWORD2].hide()
             else:
-                self._errors[self._InputName.PASSWORD2].setText("Пароли должны совпадать")
+                self._errors[self._InputName.PASSWORD2].setText(
+                    "Пароли должны совпадать"
+                )
                 self._errors[self._InputName.PASSWORD2].show()
 
         self._set_register_button_disability()
@@ -246,11 +255,30 @@ class RegistrationFormLayout(QVBoxLayout):
     def _register_btn_handler(self):
         self._register_error.hide()
         self._show_window_overlay()
-        QTimer.singleShot(1000, self._show_register_error)
 
-    def _show_register_error(self):
+        url = "http://127.0.0.1:8000/api/v1/register"
+        data = {
+            "email": self._inputs[self._InputName.EMAIL].text().strip(),
+            "password": self._inputs[self._InputName.PASSWORD].text(),
+            "phone": self._inputs[self._InputName.PHONE].text()[1:],
+            "name": self._inputs[self._InputName.NAME].text().strip(),
+            "surname": self._inputs[self._InputName.SURNAME].text().strip(),
+        }
+
+        data_json = json.dumps(data)
+
+        response = requests.post(url, data=data_json)
         self._hide_window_overlay()
-        self._register_error.setText("Что-то пошло не так")
+        if response.status_code == 200:
+            session.login_email = data["email"]
+            session.registration_name = data["name"]
+            self._success_registration_handler()
+        else:
+            pass
+            
+
+    def _show_register_error(self, error_text):
+        self._register_error.setText(error_text)
         self._register_error.show()
 
     def _validate_input(self, input_name):

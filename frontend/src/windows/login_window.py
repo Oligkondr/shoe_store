@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
 from ..utils import get_absolute_path, clear_layout
-from ..layouts import LoginFormLayout, RegistrationFormLayout
+from ..layouts import LoginFormLayout, RegistrationFormLayout, SuccessRegistrationLayout
 from ..widgets import OverlayWidget
 
 
@@ -105,7 +105,7 @@ class LoginWindow(QWidget):
     def show_registration_form(self):
         self._render_form_layout(
             RegistrationFormLayout(
-                None,
+                self.show_success_registration_message,
                 self.show_login_form,
                 self.show_overlay,
                 self.hide_overlay,
@@ -115,12 +115,15 @@ class LoginWindow(QWidget):
     def show_login_form(self):
         self._render_form_layout(
             LoginFormLayout(
-                self.show_overlay,
+                None,
                 self.show_registration_form,
                 self.show_overlay,
                 self.hide_overlay,
             )
         )
+
+    def show_success_registration_message(self):
+        self._render_form_layout(SuccessRegistrationLayout(self.show_login_form))
 
     def show_overlay(self):
         self._overlay.resize()

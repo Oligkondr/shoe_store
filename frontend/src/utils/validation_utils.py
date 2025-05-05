@@ -1,4 +1,5 @@
 from ..classes import ValidationResult
+import re
 
 
 def validate_login_email(str):
@@ -48,8 +49,8 @@ def validate_registration_phone(str):
 def validate_registration_password(str):
     if len(str) == 0:
         return ValidationResult(False, "Заполните поле")
-    elif len(str) < 6:
-        return ValidationResult(False, "Минимальная длина — 6 символов")
+    elif len(str) < 6 or len(str) > 12:
+        return ValidationResult(False, "Пароль должен содержать от 6 до 12 символов")
     else:
         return ValidationResult(True)
 
