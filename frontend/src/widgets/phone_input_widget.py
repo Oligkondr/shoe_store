@@ -25,17 +25,15 @@ class PhoneInputWidget(QLineEdit):
         # Проверка на цифры происходит в перезаписанном методе .text()
         digits_str = self.text()[:11]
 
-        formatted_text = ""
+        formatted_text = "+7"
 
-        if len(digits_str) >= 1:
-            formatted_text += "+" + digits_str[0] + " ("
         if len(digits_str) >= 2:
-            formatted_text += digits_str[1:4]
-        if len(digits_str) >= 4:
+            formatted_text += " (" + digits_str[1:4]
+        if len(digits_str) >= 5:
             formatted_text += ") " + digits_str[4:7]
-        if len(digits_str) >= 7:
+        if len(digits_str) >= 8:
             formatted_text += "-" + digits_str[7:9]
-        if len(digits_str) >= 9:
+        if len(digits_str) >= 10:
             formatted_text += "-" + digits_str[9:]
 
         # Отключение сигналов, чтобы не вызвать переформатирование
