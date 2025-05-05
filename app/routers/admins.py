@@ -74,7 +74,7 @@ def login_admin(admin: AdminAuthRequest):
         'type': 'admin',
     })
 
-    return {'access_token': access_token}
+    return {'token': access_token}
 
 
 @admins_router.get('/products', summary='Get all products', responses={
