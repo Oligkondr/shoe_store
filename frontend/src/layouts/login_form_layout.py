@@ -12,7 +12,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from enum import Enum
-import json
+import requests
 
 from ..utils import (
     get_absolute_path,
@@ -66,10 +66,6 @@ class LoginFormLayout(QVBoxLayout):
         self._login_error = QLabel()
         self._login_btn = QPushButton()
         self._employee_login_btn = QPushButton()
-        
-        # Для запроса к БД
-        self._login_manager = QNetworkAccessManager()
-        self._login_manager.finished.connect(self._on_login_response)
 
         self._init_ui()
         self._connect_signals()
@@ -185,25 +181,15 @@ class LoginFormLayout(QVBoxLayout):
         self._login_error.hide()
         self._show_window_overlay()
 
-        url = QUrl("https://localhost:5000/api/v1/admin/login")
-        request = QNetworkRequest(url)
-        request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
+        url = "http://127.0.0.1:8000/api/v1/admin/login"
+        data = {
+            "email": self._inputs[self._InputName.EMAIL],
+            "password": self._inputs[self._InputName.PASSWORD],
+        }
 
-        user_data = json.dumps(
-            {
-                "email": self._inputs[self._InputName.EMAIL],
-                "password": self._inputs[self._InputName.PASSWORD],
-            }
-        )
-        self._login_manager.post(request, QByteArray(user_data.encode("utf-8")))
-        
-    def _on_login_response(self, reply):
-        if reply.error() == QNetworkReply.NoError:
-            response_data = reply.readAll().data().decode()
-            print("Response:", response_data)
-        else:
-            print("Error:", reply.errorString())
-        
+        response = requests.post(url, data=data)
+        print("Status Code:", response.status_code)
+        print("Response Body:", response.text)
 
     def _show_login_error(self):
         self._hide_window_overlay()
