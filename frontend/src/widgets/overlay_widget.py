@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 
 from ..utils import get_absolute_path

@@ -22,17 +22,17 @@ class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.form_container = QWidget()
-        self.close_button = QPushButton()
-        self.overlay = OverlayWidget()
+        self._form_container = QWidget()
+        self._close_button = QPushButton()
+        self._overlay = OverlayWidget()
 
         # Cохранение позиции для перемещения
-        self.old_window_pos = None
+        self._old_window_pos = None
 
-        self.init_ui()
+        self._init_ui()
         self.show_login_form()
 
-    def init_ui(self):
+    def _init_ui(self):
         # Подключение файла стилей
         style_file_path = get_absolute_path(__file__, "../styles/login_style.qss")
         with open(style_file_path, "r") as file:
@@ -71,7 +71,7 @@ class LoginWindow(QWidget):
         ui_container_layout.setContentsMargins(0, 0, 0, 0)
 
         ui_container_layout.addStretch(1)
-        ui_container_layout.addWidget(self.form_container)
+        ui_container_layout.addWidget(self._form_container)
         ui_container_layout.addStretch(1)
         ui_container.setLayout(ui_container_layout)
 
@@ -82,28 +82,28 @@ class LoginWindow(QWidget):
         window_layout.addWidget(shadow_container)
         self.setLayout(window_layout)
 
-        self.overlay.setParent(ui_container)
+        self._overlay.setParent(ui_container)
 
-        self.close_button.setObjectName("close-window-btn")
-        self.close_button.setParent(ui_container)
-        self.close_button.setGeometry(302, 28, 20, 20)
-        self.close_button.setIcon(
+        self._close_button.setObjectName("close-window-btn")
+        self._close_button.setParent(ui_container)
+        self._close_button.setGeometry(302, 28, 20, 20)
+        self._close_button.setIcon(
             QIcon(get_absolute_path(__file__, "../icons/close1.png"))
         )
-        self.close_button.setIconSize(QSize(16, 16))
-        self.close_button.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
-        self.close_button.setCursor(Qt.PointingHandCursor)
-        self.close_button.clicked.connect(self.close)
+        self._close_button.setIconSize(QSize(16, 16))
+        self._close_button.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+        self._close_button.setCursor(Qt.PointingHandCursor)
+        self._close_button.clicked.connect(self.close)
 
-    def render_form_layout(self, new_layout):
-        curr_layout = self.form_container.layout()
+    def _render_form_layout(self, new_layout):
+        curr_layout = self._form_container.layout()
         if curr_layout is not None:
             clear_layout(curr_layout)
             QWidget().setLayout(curr_layout)
-        self.form_container.setLayout(new_layout)
+        self._form_container.setLayout(new_layout)
 
     def show_registration_form(self):
-        self.render_form_layout(
+        self._render_form_layout(
             RegistrationFormLayout(
                 None,
                 self.show_login_form,
@@ -113,7 +113,7 @@ class LoginWindow(QWidget):
         )
 
     def show_login_form(self):
-        self.render_form_layout(
+        self._render_form_layout(
             LoginFormLayout(
                 self.show_overlay,
                 self.show_registration_form,
@@ -123,22 +123,22 @@ class LoginWindow(QWidget):
         )
 
     def show_overlay(self):
-        self.overlay.resize()
-        self.overlay.show()
+        self._overlay.resize()
+        self._overlay.show()
 
     def hide_overlay(self):
-        self.overlay.hide()
+        self._overlay.hide()
 
     # Перемещение окна
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.old_window_pos = event.globalPos()
+            self._old_window_pos = event.globalPos()
 
     def mouseMoveEvent(self, event):
-        if self.old_window_pos:
-            delta = event.globalPos() - self.old_window_pos
+        if self._old_window_pos:
+            delta = event.globalPos() - self._old_window_pos
             self.move(self.pos() + delta)
-            self.old_window_pos = event.globalPos()
+            self._old_window_pos = event.globalPos()
 
     def mouseReleaseEvent(self, event):
-        self.old_window_pos = None
+        self._old_window_pos = None

@@ -7,17 +7,17 @@ class ClickableWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.cursor_inside = False
+        self._cursor_inside = False
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            self.cursor_inside = True
+            self._cursor_inside = True
 
     def mouseMoveEvent(self, event):
         if not self.rect().contains(event.pos()):
-            self.cursor_inside = False
+            self._cursor_inside = False
 
     def mouseReleaseEvent(self, event):
-        if self.cursor_inside and (event.button() == Qt.LeftButton):
+        if self._cursor_inside and (event.button() == Qt.LeftButton):
             self.clicked.emit()
-        self.cursor_inside = False
+        self._cursor_inside = False

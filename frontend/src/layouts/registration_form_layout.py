@@ -28,7 +28,7 @@ from ..widgets import ClickableWidget, OverlayWidget, PhoneInputWidget
 
 
 class RegistrationFormLayout(QVBoxLayout):
-    class InputName(Enum):
+    class _InputName(Enum):
         EMAIL = 1
         NAME = 2
         SURNAME = 3
@@ -45,60 +45,60 @@ class RegistrationFormLayout(QVBoxLayout):
     ):
         super().__init__()
 
-        self.success_registration_handler = success_registration_handler
-        self.back_btn_handler = back_btn_handler
-        self.show_window_overlay = show_window_overlay
-        self.hide_window_overlay = hide_window_overlay
+        self._success_registration_handler = success_registration_handler
+        self._back_btn_handler = back_btn_handler
+        self._show_window_overlay = show_window_overlay
+        self._hide_window_overlay = hide_window_overlay
 
-        self.inputs = dict()
-        self.errors = dict()
-        self.inputs_validity = dict()
-        self.toggle_btns = dict()
+        self._inputs = dict()
+        self._errors = dict()
+        self._inputs_validity = dict()
+        self._toggle_btns = dict()
 
-        for input_name in self.InputName:
-            self.inputs[input_name] = QLineEdit()
-            self.errors[input_name] = QLabel()
-            self.inputs_validity[input_name] = None
-        self.inputs[self.InputName.PHONE] = PhoneInputWidget()
+        for input_name in self._InputName:
+            self._inputs[input_name] = QLineEdit()
+            self._errors[input_name] = QLabel()
+            self._inputs_validity[input_name] = None
+        self._inputs[self._InputName.PHONE] = PhoneInputWidget()
 
-        for input_name in [self.InputName.PASSWORD, self.InputName.PASSWORD2]:
-            self.toggle_btns[input_name] = QPushButton()
-            self.toggle_btns[input_name].setCheckable(True)
+        for input_name in [self._InputName.PASSWORD, self._InputName.PASSWORD2]:
+            self._toggle_btns[input_name] = QPushButton()
+            self._toggle_btns[input_name].setCheckable(True)
 
-        self.validators = {
-            self.InputName.EMAIL: validate_registration_email,
-            self.InputName.NAME: validate_registration_name,
-            self.InputName.SURNAME: validate_registration_surname,
-            self.InputName.PHONE: validate_registration_phone,
-            self.InputName.PASSWORD: validate_registration_password,
-            self.InputName.PASSWORD2: validate_registration_password2,
+        self._validators = {
+            self._InputName.EMAIL: validate_registration_email,
+            self._InputName.NAME: validate_registration_name,
+            self._InputName.SURNAME: validate_registration_surname,
+            self._InputName.PHONE: validate_registration_phone,
+            self._InputName.PASSWORD: validate_registration_password,
+            self._InputName.PASSWORD2: validate_registration_password2,
         }
 
-        self.back_btn = QPushButton()
+        self._back_btn = QPushButton()
 
-        self.password_toggle_btn = QPushButton()
-        self.password_toggle_btn.setCheckable(True)
+        self._password_toggle_btn = QPushButton()
+        self._password_toggle_btn.setCheckable(True)
 
-        self.password2_toggle_btn = QPushButton()
-        self.password2_toggle_btn.setCheckable(True)
+        self._password2_toggle_btn = QPushButton()
+        self._password2_toggle_btn.setCheckable(True)
 
-        self.register_error = QLabel()
-        self.register_btn = QPushButton()
+        self._register_error = QLabel()
+        self._register_btn = QPushButton()
 
-        self.init_ui()
-        self.connect_signals()
+        self._init_ui()
+        self._connect_signals()
 
-    def init_ui(self):
+    def _init_ui(self):
         self.setSpacing(0)
         self.setContentsMargins(30, 30, 30, 30)
 
         title = QLabel("Регистрация")
         add_class(title, "title-text")
 
-        self.back_btn.setText("Вернуться")
-        self.back_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-        add_class(self.back_btn, "small-btn")
-        self.back_btn.setCursor(Qt.PointingHandCursor)
+        self._back_btn.setText("Вернуться")
+        self._back_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        add_class(self._back_btn, "small-btn")
+        self._back_btn.setCursor(Qt.PointingHandCursor)
 
         back_btn_icon = QLabel("← ")
         back_btn_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
@@ -107,182 +107,182 @@ class RegistrationFormLayout(QVBoxLayout):
 
         back_btn_layout = QHBoxLayout()
         back_btn_layout.addWidget(back_btn_icon)
-        back_btn_layout.addWidget(self.back_btn)
+        back_btn_layout.addWidget(self._back_btn)
         back_btn_layout.addStretch(1)
 
-        for input_name in self.InputName:
-            add_class(self.inputs[input_name], "text-input")
-            self.inputs[input_name].setFixedHeight(30)
+        for input_name in self._InputName:
+            add_class(self._inputs[input_name], "text-input")
+            self._inputs[input_name].setFixedHeight(30)
 
-            add_class(self.errors[input_name], "error-text")
-            self.errors[input_name].setContentsMargins(0, 2, 0, 0)
-            self.errors[input_name].hide()
+            add_class(self._errors[input_name], "error-text")
+            self._errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self._errors[input_name].hide()
 
-        self.inputs[self.InputName.EMAIL].setPlaceholderText("Email")
-        self.inputs[self.InputName.NAME].setPlaceholderText("Имя")
-        self.inputs[self.InputName.SURNAME].setPlaceholderText("Фамилия")
-        self.inputs[self.InputName.PHONE].setPlaceholderText("Телефон")
-        self.inputs[self.InputName.PASSWORD].setPlaceholderText("Пароль")
-        self.inputs[self.InputName.PASSWORD2].setPlaceholderText("Подтвердите пароль")
+        self._inputs[self._InputName.EMAIL].setPlaceholderText("Email")
+        self._inputs[self._InputName.NAME].setPlaceholderText("Имя")
+        self._inputs[self._InputName.SURNAME].setPlaceholderText("Фамилия")
+        self._inputs[self._InputName.PHONE].setPlaceholderText("Телефон")
+        self._inputs[self._InputName.PASSWORD].setPlaceholderText("Пароль")
+        self._inputs[self._InputName.PASSWORD2].setPlaceholderText("Подтвердите пароль")
 
-        self.inputs[self.InputName.PASSWORD].setEchoMode(QLineEdit.Password)
-        self.inputs[self.InputName.PASSWORD2].setEchoMode(QLineEdit.Password)
+        self._inputs[self._InputName.PASSWORD].setEchoMode(QLineEdit.Password)
+        self._inputs[self._InputName.PASSWORD2].setEchoMode(QLineEdit.Password)
 
-        for input_name in [self.InputName.PASSWORD, self.InputName.PASSWORD2]:
-            self.toggle_btns[input_name].setFixedHeight(30)
-            self.toggle_btns[input_name].setFixedWidth(30)
-            self.toggle_btns[input_name].setCursor(Qt.PointingHandCursor)
-            self.toggle_btns[input_name].setIcon(
+        for input_name in [self._InputName.PASSWORD, self._InputName.PASSWORD2]:
+            self._toggle_btns[input_name].setFixedHeight(30)
+            self._toggle_btns[input_name].setFixedWidth(30)
+            self._toggle_btns[input_name].setCursor(Qt.PointingHandCursor)
+            self._toggle_btns[input_name].setIcon(
                 QIcon(get_absolute_path(__file__, "../icons/password_closed.png"))
             )
-            self.toggle_btns[input_name].setIconSize(QSize(20, 20))
-            add_class(self.toggle_btns[input_name], "password-btn")
-            self.toggle_btns[input_name].setStyleSheet("text-align: right")
+            self._toggle_btns[input_name].setIconSize(QSize(20, 20))
+            add_class(self._toggle_btns[input_name], "password-btn")
+            self._toggle_btns[input_name].setStyleSheet("text-align: right")
 
         password_layout = QHBoxLayout()
-        password_layout.addWidget(self.inputs[self.InputName.PASSWORD])
-        password_layout.addWidget(self.toggle_btns[self.InputName.PASSWORD])
+        password_layout.addWidget(self._inputs[self._InputName.PASSWORD])
+        password_layout.addWidget(self._toggle_btns[self._InputName.PASSWORD])
 
         password2_layout = QHBoxLayout()
-        password2_layout.addWidget(self.inputs[self.InputName.PASSWORD2])
-        password2_layout.addWidget(self.toggle_btns[self.InputName.PASSWORD2])
+        password2_layout.addWidget(self._inputs[self._InputName.PASSWORD2])
+        password2_layout.addWidget(self._toggle_btns[self._InputName.PASSWORD2])
 
-        add_class(self.register_error, "error-text", "error-text_above")
-        self.register_error.setContentsMargins(0, 0, 0, 7)
-        self.register_error.hide()
+        add_class(self._register_error, "error-text", "error-text_above")
+        self._register_error.setContentsMargins(0, 0, 0, 7)
+        self._register_error.hide()
 
-        self.register_btn.setText("Зарегистрироваться")
-        add_class(self.register_btn, "main-btn", "main-btn_solid")
-        self.register_btn.setFixedHeight(40)
-        self.register_btn.setContentsMargins(8, -1, 8, 0)
-        self.register_btn.setCursor(Qt.PointingHandCursor)
-        self.register_btn.setDisabled(True)
+        self._register_btn.setText("Зарегистрироваться")
+        add_class(self._register_btn, "main-btn", "main-btn_solid")
+        self._register_btn.setFixedHeight(40)
+        self._register_btn.setContentsMargins(8, -1, 8, 0)
+        self._register_btn.setCursor(Qt.PointingHandCursor)
+        self._register_btn.setDisabled(True)
 
         self.addWidget(title)
         self.addLayout(back_btn_layout)
         self.addSpacing(16)
         for input_name in [
-            self.InputName.EMAIL,
-            self.InputName.NAME,
-            self.InputName.SURNAME,
-            self.InputName.PHONE,
+            self._InputName.EMAIL,
+            self._InputName.NAME,
+            self._InputName.SURNAME,
+            self._InputName.PHONE,
         ]:
-            self.addWidget(self.inputs[input_name])
-            self.addWidget(self.errors[input_name])
+            self.addWidget(self._inputs[input_name])
+            self.addWidget(self._errors[input_name])
             self.addSpacing(10)
         self.addLayout(password_layout)
-        self.addWidget(self.errors[self.InputName.PASSWORD])
+        self.addWidget(self._errors[self._InputName.PASSWORD])
         self.addSpacing(10)
         self.addLayout(password2_layout)
-        self.addWidget(self.errors[self.InputName.PASSWORD2])
+        self.addWidget(self._errors[self._InputName.PASSWORD2])
         self.addSpacing(30)
-        self.addWidget(self.register_error, alignment=Qt.AlignHCenter)
-        self.addWidget(self.register_btn)
+        self.addWidget(self._register_error, alignment=Qt.AlignHCenter)
+        self.addWidget(self._register_btn)
 
-    def connect_signals(self):
-        self.back_btn.clicked.connect(self.back_btn_handler)
+    def _connect_signals(self):
+        self._back_btn.clicked.connect(self._back_btn_handler)
 
-        self.inputs[self.InputName.EMAIL].textChanged.connect(self.email_input_handler)
-        self.inputs[self.InputName.NAME].textChanged.connect(self.name_input_handler)
-        self.inputs[self.InputName.SURNAME].textChanged.connect(
-            self.surname_input_handler
+        self._inputs[self._InputName.EMAIL].textChanged.connect(self._email_input_handler)
+        self._inputs[self._InputName.NAME].textChanged.connect(self._name_input_handler)
+        self._inputs[self._InputName.SURNAME].textChanged.connect(
+            self._surname_input_handler
         )
-        self.inputs[self.InputName.PHONE].textChanged.connect(self.phone_input_handler)
-        self.inputs[self.InputName.PASSWORD].textChanged.connect(
-            self.password_input_handler
+        self._inputs[self._InputName.PHONE].textChanged.connect(self._phone_input_handler)
+        self._inputs[self._InputName.PASSWORD].textChanged.connect(
+            self._password_input_handler
         )
-        self.inputs[self.InputName.PASSWORD2].textChanged.connect(
-            self.password2_input_handler
-        )
-
-        self.toggle_btns[self.InputName.PASSWORD].clicked.connect(
-            self.password_toggle_btn_handler
-        )
-        self.toggle_btns[self.InputName.PASSWORD2].clicked.connect(
-            self.password2_toggle_btn_handler
+        self._inputs[self._InputName.PASSWORD2].textChanged.connect(
+            self._password2_input_handler
         )
 
-        self.register_btn.clicked.connect(self.register_btn_handler)
+        self._toggle_btns[self._InputName.PASSWORD].clicked.connect(
+            self._password_toggle_btn_handler
+        )
+        self._toggle_btns[self._InputName.PASSWORD2].clicked.connect(
+            self._password2_toggle_btn_handler
+        )
 
-    def email_input_handler(self):
-        self.validate_input(self.InputName.EMAIL)
-        self.set_register_button_disability()
+        self._register_btn.clicked.connect(self._register_btn_handler)
 
-    def name_input_handler(self):
-        self.validate_input(self.InputName.NAME)
-        self.set_register_button_disability()
+    def _email_input_handler(self):
+        self._validate_input(self._InputName.EMAIL)
+        self._set_register_button_disability()
 
-    def surname_input_handler(self):
-        self.validate_input(self.InputName.SURNAME)
-        self.set_register_button_disability()
+    def _name_input_handler(self):
+        self._validate_input(self._InputName.NAME)
+        self._set_register_button_disability()
 
-    def phone_input_handler(self):
-        self.validate_input(self.InputName.PHONE)
-        self.set_register_button_disability()
+    def _surname_input_handler(self):
+        self._validate_input(self._InputName.SURNAME)
+        self._set_register_button_disability()
 
-    def password_input_handler(self):
-        self.validate_input(self.InputName.PASSWORD)
-        if len(self.inputs[self.InputName.PASSWORD2].text()) > 0:
-            self.password2_input_handler()
+    def _phone_input_handler(self):
+        self._validate_input(self._InputName.PHONE)
+        self._set_register_button_disability()
+
+    def _password_input_handler(self):
+        self._validate_input(self._InputName.PASSWORD)
+        if len(self._inputs[self._InputName.PASSWORD2].text()) > 0:
+            self._password2_input_handler()
         else:
-            self.set_register_button_disability()
+            self._set_register_button_disability()
 
-    def password2_input_handler(self):
-        self.validate_input(self.InputName.PASSWORD2)
+    def _password2_input_handler(self):
+        self._validate_input(self._InputName.PASSWORD2)
 
-        if self.inputs_validity[self.InputName.PASSWORD2]:
-            self.inputs_validity[self.InputName.PASSWORD2] = (
-                self.inputs[self.InputName.PASSWORD].text()
-                == self.inputs[self.InputName.PASSWORD2].text()
+        if self._inputs_validity[self._InputName.PASSWORD2]:
+            self._inputs_validity[self._InputName.PASSWORD2] = (
+                self._inputs[self._InputName.PASSWORD].text()
+                == self._inputs[self._InputName.PASSWORD2].text()
             )
-            if self.inputs_validity[self.InputName.PASSWORD2]:
-                self.errors[self.InputName.PASSWORD2].hide()
+            if self._inputs_validity[self._InputName.PASSWORD2]:
+                self._errors[self._InputName.PASSWORD2].hide()
             else:
-                self.errors[self.InputName.PASSWORD2].setText("Пароли должны совпадать")
-                self.errors[self.InputName.PASSWORD2].show()
+                self._errors[self._InputName.PASSWORD2].setText("Пароли должны совпадать")
+                self._errors[self._InputName.PASSWORD2].show()
 
-        self.set_register_button_disability()
+        self._set_register_button_disability()
 
-    def register_btn_handler(self):
-        self.register_error.hide()
-        self.show_window_overlay()
-        QTimer.singleShot(1000, self.show_register_error)
+    def _register_btn_handler(self):
+        self._register_error.hide()
+        self._show_window_overlay()
+        QTimer.singleShot(1000, self._show_register_error)
 
-    def show_register_error(self):
-        self.hide_window_overlay()
-        self.register_error.setText("Что-то пошло не так")
-        self.register_error.show()
+    def _show_register_error(self):
+        self._hide_window_overlay()
+        self._register_error.setText("Что-то пошло не так")
+        self._register_error.show()
 
-    def validate_input(self, input_name):
-        text = self.inputs[input_name].text()
-        validation_result = self.validators[input_name](text)
-        self.inputs_validity[input_name] = validation_result.is_valid
+    def _validate_input(self, input_name):
+        text = self._inputs[input_name].text()
+        validation_result = self._validators[input_name](text)
+        self._inputs_validity[input_name] = validation_result.is_valid
 
-        if self.inputs_validity[input_name]:
-            self.errors[input_name].hide()
+        if self._inputs_validity[input_name]:
+            self._errors[input_name].hide()
         else:
-            self.errors[input_name].setText(validation_result.message)
-            self.errors[input_name].show()
+            self._errors[input_name].setText(validation_result.message)
+            self._errors[input_name].show()
 
-    def password_toggle_btn_handler(self):
-        self.toggle_password_visibility(self.InputName.PASSWORD)
+    def _password_toggle_btn_handler(self):
+        self._toggle_password_visibility(self._InputName.PASSWORD)
 
-    def password2_toggle_btn_handler(self):
-        self.toggle_password_visibility(self.InputName.PASSWORD2)
+    def _password2_toggle_btn_handler(self):
+        self._toggle_password_visibility(self._InputName.PASSWORD2)
 
-    def toggle_password_visibility(self, input_name):
-        if self.toggle_btns[input_name].isChecked():
-            self.toggle_btns[input_name].setIcon(
+    def _toggle_password_visibility(self, input_name):
+        if self._toggle_btns[input_name].isChecked():
+            self._toggle_btns[input_name].setIcon(
                 QIcon(get_absolute_path(__file__, "../icons/password_opened.png"))
             )
-            self.inputs[input_name].setEchoMode(QLineEdit.Normal)
+            self._inputs[input_name].setEchoMode(QLineEdit.Normal)
         else:
-            self.toggle_btns[input_name].setIcon(
+            self._toggle_btns[input_name].setIcon(
                 QIcon(get_absolute_path(__file__, "../icons/password_closed.png"))
             )
-            self.inputs[input_name].setEchoMode(QLineEdit.Password)
+            self._inputs[input_name].setEchoMode(QLineEdit.Password)
 
-    def set_register_button_disability(self):
-        self.register_error.hide()
-        form_validity = all(self.inputs_validity.values())
-        self.register_btn.setDisabled(not form_validity)
+    def _set_register_button_disability(self):
+        self._register_error.hide()
+        form_validity = all(self._inputs_validity.values())
+        self._register_btn.setDisabled(not form_validity)

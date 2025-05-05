@@ -1,4 +1,3 @@
-from PyQt5.QtGui import QFocusEvent
 from PyQt5.QtWidgets import QLineEdit
 import re
 
@@ -6,7 +5,7 @@ import re
 class PhoneInputWidget(QLineEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.textChanged.connect(self.on_text_changed)
+        self.textChanged.connect(self._on_text_changed)
         
     # Перезапись поведения получения введённого текста из виджета
     # Возваращает только введённые цифры, а не весь отформатированный текст
@@ -21,7 +20,7 @@ class PhoneInputWidget(QLineEdit):
         super().focusInEvent(event)
 
     # Перезапись поведения при вводе текста
-    def on_text_changed(self):
+    def _on_text_changed(self):
         # Запрет на ввод больше, чем 11 цифр
         # Проверка на цифры происходит в перезаписанном методе .text()
         digits_str = self.text()[:11]

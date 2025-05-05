@@ -24,6 +24,16 @@ class Admin(Base, PasswordEncryption):
     patronymic: Mapped[str] = mapped_column(nullable=True)
     is_super: Mapped[bool] = mapped_column(default=False)
 
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'phone': self.phone,
+            'name': self.name,
+            'surname': self.surname,
+            'patronymic': self.patronymic,
+            'is_super': self.is_super,
+        }
+
 
 class Client(Base, PasswordEncryption):
     email: Mapped[str] = mapped_column(unique=True)
@@ -31,9 +41,18 @@ class Client(Base, PasswordEncryption):
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]
-    account: Mapped[int] = mapped_column(server_default=text("0"))
+    account: Mapped[int] = mapped_column(nullable=True)
 
     orders = relationship("Order", back_populates='client')
+
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'phone': self.phone,
+            'name': self.name,
+            'surname': self.surname,
+            'account': self.account,
+        }
 
 
 class Order(Base):
@@ -62,6 +81,7 @@ class Product(Base):
     price: Mapped[int] = mapped_column(server_default=text("0"))
     quantity: Mapped[int] = mapped_column(SmallInteger)
 
+    model_color = relationship("ModelColor", back_populates="products")
     size = relationship('Size', back_populates='products')
     order_products = relationship("OrderProduct", back_populates="product")
 
@@ -79,6 +99,8 @@ class ModelColor(Base):
     color_id: Mapped[int] = mapped_column(ForeignKey('colors.id'))
 
     model = relationship('Model', back_populates='model_colors')
+    color = relationship('Color', back_populates='models')
+    products = relationship('Product', back_populates='model_color')
 
 
 class Model(Base):
@@ -108,6 +130,7 @@ base_color_color = Table(
 class Color(Base):
     name: Mapped[str] = mapped_column(nullable=True)
 
+    models = relationship('ModelColor', back_populates='color')
     base_colors: Mapped[List["BaseColor"]] = relationship('BaseColor', secondary=base_color_color,
                                                           back_populates='colors')
 

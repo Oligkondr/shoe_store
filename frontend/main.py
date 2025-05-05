@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFontDatabase
 
 from src.utils import get_absolute_path
-from src.windows import LoginWindow
+from src.windows import LoginWindow, MainWindow
 
 if __name__ == "__main__":
     # Инициализация приложения
