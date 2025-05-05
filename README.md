@@ -7,16 +7,16 @@
 3. Запустить контейнер:
 
     ```
-    $ docker-compose up -d
+    docker-compose up -d
     ```
 
 4. Применить миграции:
     ```
-    $ alembic upgrade head
+    alembic upgrade head
     ```
 5. Запустить uvicorn:
     ```
-    $ uvicorn app.main:app
+    uvicorn app.main:app
     ```
 
 **Документация (Swagger UI):**
