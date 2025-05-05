@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
 
-class AdminLoginResponse(BaseModel):
+class UserLoginResponse(BaseModel):
     token: str
 
 
-class AdminRegisterResponse(BaseModel):
+class UserRegisterResponse(BaseModel):
     success: bool

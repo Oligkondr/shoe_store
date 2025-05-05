@@ -45,6 +45,15 @@ class Client(Base, PasswordEncryption):
 
     orders = relationship("Order", back_populates='client')
 
+    def to_dict(self):
+        return {
+            'email': self.email,
+            'phone': self.phone,
+            'name': self.name,
+            'surname': self.surname,
+            'account': self.account,
+        }
+
 
 class Order(Base):
     client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))

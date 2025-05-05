@@ -1,38 +1,20 @@
-from types import new_class
-
 from fastapi import APIRouter, HTTPException, status, Depends
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import sessionmaker, joinedload
+from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from app.auth.auth_handler import create_access_token, verify_password, get_current_admin
 from app.database import session_maker
-from app.requests import AdminCreateRequest, AdminAuthRequest
+from app.requests import AdminCreateRequest, UserAuthRequest
 
 from app.models import Admin, Product, ModelColor, Color, Model
-from app.config import get_db_url
-from app.responses.responses import AdminLoginResponse, AdminRegisterResponse
+from app.responses.responses import UserRegisterResponse, UserLoginResponse
 
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
 @admins_router.get('/test', summary='Test get request')
 def get_test():
-    engine = create_engine(get_db_url())
-    session_maker = sessionmaker(engine, expire_on_commit=False)
-    with session_maker() as session:
-        new_admin = Admin(
-            email='admin.email',
-            password='admin.password',
-            phone='admin.phone',
-            name='admin.name',
-            surname='admin.surname',
-            patronymic='admin.patronymic',
-            is_super=True,
-        )
-        session.add(new_admin)
-        session.commit()
-
-    return new_admin
+    return {'message': 'Test get request'}
 
 
 @admins_router.post('/test', summary='Test post request')
@@ -40,7 +22,7 @@ def post_test(admin: Admin = Depends(get_current_admin)):
     return {'message': admin}
 
 
-@admins_router.post("/register", summary='Create new admin', response_model=AdminRegisterResponse)
+@admins_router.post("/register", summary='Create new admin', response_model=UserRegisterResponse)
 def create_admin(admin: AdminCreateRequest):
     with session_maker() as session:
         new_admin = Admin(
@@ -58,8 +40,8 @@ def create_admin(admin: AdminCreateRequest):
     return {'success': True}
 
 
-@admins_router.post("/login", summary='Login admin', response_model=AdminLoginResponse)
-def login_admin(admin: AdminAuthRequest):
+@admins_router.post("/login", summary='Login admin', response_model=UserLoginResponse)
+def login_admin(admin: UserAuthRequest):
     with session_maker() as session:
         stmt = select(Admin).where(Admin.email == admin.email)
         result = session.execute(stmt)
