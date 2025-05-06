@@ -1,0 +1,77 @@
+QWidget {
+    font-family: "Manrope";
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0;
+    margin: 0;
+    background: none;
+    background-color: #ffffff;
+}
+
+.main-btn {
+    background-color: #ffffff;
+    font-weight: 800;
+    border: 1px solid #000000;
+}
+.main-btn:hover {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.main-btn_solid {
+    background-color: #000000;
+    color: #ffffff;
+}
+.main-btn_solid:hover {
+    background-color: #ffffff;
+    color: #000000;
+}
+.main-btn_solid:disabled {
+    background-color: #ffffff;
+    color: #7f7f7f;
+    border-color: #dcdcdc;
+}
+
+
+.small-btn {
+    font-size: 12px;
+    border-bottom: 1px solid #000000;
+}
+.small-btn:hover {
+    border-color: #ffffff;
+}
+.small-btn:disabled {
+    color: #7f7f7f;
+    border-color: #7f7f7f;
+}
+
+
+.title-text {
+    font-size: 28px;
+    font-weight: 800;
+}
+.small-text {
+    font-size: 12px;
+}
+.error-text {
+    font-size: 10px;
+    color: #ef233c;
+}
+.underline {
+    text-decoration: underline;
+}
+
+
+.text-input {
+    border-bottom: 1px solid #000000;
+    padding-left: -2px;
+    font-weight: 800;
+}
+
+.password-btn {
+    border-bottom: 1px solid #000000;
+}
+
+#login-image {
+    background-color: black
+}
