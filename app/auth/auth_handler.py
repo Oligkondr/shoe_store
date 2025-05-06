@@ -78,4 +78,4 @@ def get_current_user(user_type: str, token: str):
         result = session.execute(stmt)
         user_db = result.scalar_one_or_none()
 
-    return user_db.to_dict()
+    return user_db

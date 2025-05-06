@@ -3,6 +3,8 @@ from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, Da
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
 
+from sqlalchemy.testing.pickleable import Order
+
 from app.database import Base, session_maker, first_or_create
 from datetime import datetime
 
@@ -79,6 +81,12 @@ class Order(Base):
 
     client = relationship("Client", back_populates="orders")
     order_products = relationship("OrderProduct", back_populates="order")
+
+    def update_price(self):
+        total = 0
+        with session_maker as session:
+            for products in self.order_products:
+                total += products.price
 
 
 class OrderProduct(Base):

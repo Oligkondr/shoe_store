@@ -22,3 +22,8 @@ class ClientCreateRequest(BaseModel):
 class UserAuthRequest(BaseModel):
     email: str = Field(..., description="Электронная почта")
     password: str = Field(..., min_length=6, max_length=12, description="Пароль, от 1 до 12 символов")
+
+
+class ClientProductRequest(BaseModel):
+    id: int
+    quantity: int

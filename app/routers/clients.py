@@ -3,9 +3,9 @@ from sqlalchemy import select
 from starlette import status
 
 from app.auth.auth_handler import verify_password, create_access_token, get_current_client
-from app.models import Client, Order
+from app.models import Client, Order, Product, OrderProduct
 from app.database import session_maker, first_or_create
-from app.requests import ClientCreateRequest, UserAuthRequest
+from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest
 from app.responses.responses import UserLoginResponse, UserRegisterResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["client"])
@@ -15,7 +15,8 @@ clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 async def test():
     with session_maker() as session:
         order_obj = first_or_create(session, Order, None, client_id=2, status_id=Order.STATUS_NEW_ID)
-    return order_obj
+        order_products = order_obj.order_products
+    return order_products
 
 
 @clients_router.post('/test', summary='Test post request')
@@ -60,6 +61,23 @@ def login_client(client: UserAuthRequest):
 
 
 @clients_router.post('/product', summary='Add product to order')
-def add_product(client: Client = Depends(get_current_client)):
+def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        return {'success': True}
+        order_obj = first_or_create(session, Order, None, client_id=client.id, status_id=Order.STATUS_NEW_ID)
+
+        stmt = select(Product).where(Product.id == data.id)
+        result = session.execute(stmt)
+        product_obj = result.scalar_one_or_none()
+
+        new_order_product = OrderProduct(
+            product=product_obj,
+            order=order_obj,
+            quantity=data.quantity,
+            price=product_obj.price,
+        )
+
+        session.add(new_order_product)
+
+        session.commit()
+
+    return new_order_product
