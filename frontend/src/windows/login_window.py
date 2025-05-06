@@ -17,6 +17,7 @@ from ..utils import get_absolute_path, clear_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout, SuccessRegistrationLayout
 from ..widgets import OverlayWidget
 
+
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -116,13 +117,6 @@ class LoginWindow(QWidget):
 
     def hide_overlay(self):
         self._overlay.hide()
-    
-    def show_main_window(self):
-        from ..windows import MainWindow
-        self._main_window = MainWindow()
-        self._main_window.show()
-        self.close()
-        
 
     # Перемещение окна
     def mousePressEvent(self, event):

@@ -5,6 +5,7 @@ from PyQt5.QtGui import QFontDatabase
 
 from src.utils import get_absolute_path
 from src.windows import LoginWindow
+from session import session
 
 if __name__ == "__main__":
     # Инициализация приложения
@@ -15,6 +16,6 @@ if __name__ == "__main__":
     for file in listdir(font_dir_path):
         QFontDatabase.addApplicationFont(path.join(font_dir_path, file))
 
-    window = LoginWindow()
-    window.show()
+    session.curr_window = LoginWindow()
+    session.curr_window.show()
     sys.exit(app.exec_())

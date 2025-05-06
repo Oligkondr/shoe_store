@@ -206,7 +206,10 @@ class LoginFormLayout(QVBoxLayout):
             data = json.loads(response.text)
             if response.status_code == 200:
                 session.token = data["token"]
-                self._parent_window.show_main_window()
+                from ..windows import MainWindow
+                session.curr_window = MainWindow()
+                session.curr_window.show()
+                self._parent_window.close()
             elif response.status_code == 401:
                 self._show_login_error(data["detail"])
                 self._parent_window.hide_overlay()
