@@ -10,8 +10,7 @@ from app.models import Client, Order, Product, OrderProduct, ModelColor, SizeGri
 from app.database import session_maker
 from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest, \
     ClientUpdateRequest
-from app.responses.responses import UserLoginResponse, UserRegisterResponse, ClientProductResponse, \
-    ClientRegisterResponse, ClientDepositResponse
+from app.responses.responses import UserLoginResponse, ClientRegisterResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 
@@ -35,11 +34,11 @@ clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 def create_admin(client: ClientCreateRequest):
     with session_maker() as session:
         if session.query(Client).filter_by(email=client.email).first() is not None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Пользователь с такой почтой уже зарегистрирован")
 
         if session.query(Client).filter_by(phone=client.phone).first() is not None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="Пользователь с таким номером уже зарегистрирован")
 
         new_client = Client(
@@ -459,7 +458,7 @@ def approve(client: Client = Depends(get_current_client)):
     return order
 
 
-@clients_router.post('/profile', summary='Save profile changes', responses={
+@clients_router.put('/profile', summary='Save profile changes', responses={
     200: {
         "description": "Удачный ответ",
         "content": {
@@ -818,7 +817,7 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
     }
 })
 def get_orders(client: Client = Depends(get_current_client)):
-    with (session_maker() as session):
+    with session_maker() as session:
         orders_obj = session.query(Order).options(
             joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
                 Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
@@ -827,5 +826,226 @@ def get_orders(client: Client = Depends(get_current_client)):
             joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
                 Product.size_grid).subqueryload(SizeGrid.size),
         ).filter(
-            Order.client_id == client.id).all()
+            Order.client_id == client.id,
+            Order.status_id != Order.STATUS_NEW_ID,
+        ).all()
     return orders_obj
+
+
+@clients_router.get('/order', summary='Get client active order', responses={
+    200: {
+        "description": "Удачный ответ",
+        "content": {
+            "application/json": {
+                "example":
+                    {
+                        "client_id": 2,
+                        "created_at": "2025-05-06T16:19:29.574851+00:00",
+                        "status_id": 0,
+                        "price": 8299,
+                        "approved_at": "null",
+                        "id": 22,
+                        "updated_at": "2025-05-06T19:33:57.452965+00:00",
+                        "order_products": [
+                            {
+                                "order_id": 22,
+                                "price": 5000,
+                                "created_at": "2025-05-06T16:19:29.584804+00:00",
+                                "product_id": 1,
+                                "quantity": 1,
+                                "id": 87,
+                                "updated_at": "2025-05-06T16:19:29.584804+00:00",
+                                "product": {
+                                    "price": 5000,
+                                    "created_at": "2025-05-06T07:12:51.945606+00:00",
+                                    "model_color_id": 1,
+                                    "id": 1,
+                                    "updated_at": "2025-05-06T12:04:56.285405+00:00",
+                                    "size_grid": [
+                                        {
+                                            "quantity": 200,
+                                            "product_id": 1,
+                                            "id": 1,
+                                            "updated_at": "2025-05-06T07:34:42.153756+00:00",
+                                            "size_id": 1,
+                                            "created_at": "2025-05-06T07:34:42.153756+00:00",
+                                            "size": {
+                                                "id": 1,
+                                                "cm": "28",
+                                                "updated_at": "2025-05-06T07:15:30.350688+00:00",
+                                                "ru": "43",
+                                                "created_at": "2025-05-06T07:15:30.350688+00:00"
+                                            }
+                                        },
+                                        {
+                                            "quantity": 159,
+                                            "product_id": 1,
+                                            "id": 2,
+                                            "updated_at": "2025-05-06T07:41:46.584329+00:00",
+                                            "size_id": 2,
+                                            "created_at": "2025-05-06T07:41:46.584329+00:00",
+                                            "size": {
+                                                "id": 2,
+                                                "cm": "29",
+                                                "updated_at": "2025-05-06T07:41:28.958393+00:00",
+                                                "ru": "44",
+                                                "created_at": "2025-05-06T07:41:28.958393+00:00"
+                                            }
+                                        }
+                                    ],
+                                    "model_color": {
+                                        "id": 1,
+                                        "created_at": "2025-05-06T07:12:35.862637+00:00",
+                                        "model_id": 1,
+                                        "name": "Bloody Black",
+                                        "color_id": 1,
+                                        "updated_at": "2025-05-06T07:12:35.862637+00:00",
+                                        "model": {
+                                            "sex_id": 2,
+                                            "category_id": 1,
+                                            "created_at": "2025-05-06T07:11:44.646189+00:00",
+                                            "name": "Sneakers",
+                                            "description": "Super sneakers",
+                                            "id": 1,
+                                            "updated_at": "2025-05-06T07:11:44.646189+00:00",
+                                            "category": {
+                                                "updated_at": "2025-05-06T07:11:40.030859+00:00",
+                                                "id": 1,
+                                                "name": "sneakers",
+                                                "created_at": "2025-05-06T07:11:40.030859+00:00"
+                                            }
+                                        },
+                                        "color": {
+                                            "name": "black, white,red",
+                                            "created_at": "2025-05-06T07:10:11.435277+00:00",
+                                            "id": 1,
+                                            "updated_at": "2025-05-06T07:10:11.435277+00:00",
+                                            "base_colors": [
+                                                {
+                                                    "id": 1,
+                                                    "created_at": "2025-05-06T10:08:56+00:00",
+                                                    "name": "black",
+                                                    "hex": "000000",
+                                                    "updated_at": "2025-05-06T10:08:58+00:00"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "created_at": "2025-05-06T07:09:33.610019+00:00",
+                                                    "name": "white",
+                                                    "hex": "ffffff",
+                                                    "updated_at": "2025-05-06T07:09:33.610019+00:00"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "created_at": "2025-05-06T07:09:46.459870+00:00",
+                                                    "name": "red",
+                                                    "hex": "ff0000",
+                                                    "updated_at": "2025-05-06T07:09:46.459870+00:00"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                "order_id": 22,
+                                "price": 3299,
+                                "created_at": "2025-05-06T16:33:57.422188+00:00",
+                                "product_id": 2,
+                                "quantity": 1,
+                                "id": 88,
+                                "updated_at": "2025-05-06T16:33:57.422188+00:00",
+                                "product": {
+                                    "price": 3299,
+                                    "created_at": "2025-05-06T08:06:03.058980+00:00",
+                                    "model_color_id": 2,
+                                    "id": 2,
+                                    "updated_at": "2025-05-06T08:06:03.058980+00:00",
+                                    "size_grid": [
+                                        {
+                                            "quantity": 32,
+                                            "product_id": 2,
+                                            "id": 3,
+                                            "updated_at": "2025-05-06T08:07:30.048761+00:00",
+                                            "size_id": 1,
+                                            "created_at": "2025-05-06T08:07:30.048761+00:00",
+                                            "size": {
+                                                "id": 1,
+                                                "cm": "28",
+                                                "updated_at": "2025-05-06T07:15:30.350688+00:00",
+                                                "ru": "43",
+                                                "created_at": "2025-05-06T07:15:30.350688+00:00"
+                                            }
+                                        }
+                                    ],
+                                    "model_color": {
+                                        "id": 2,
+                                        "created_at": "2025-05-06T08:05:20.068753+00:00",
+                                        "model_id": 2,
+                                        "name": "Super Red",
+                                        "color_id": 1,
+                                        "updated_at": "2025-05-06T08:05:20.068753+00:00",
+                                        "model": {
+                                            "sex_id": 0,
+                                            "category_id": 2,
+                                            "created_at": "2025-05-06T08:03:51.575198+00:00",
+                                            "name": "Shit Squeezers",
+                                            "description": "Squeeze this shit!",
+                                            "id": 2,
+                                            "updated_at": "2025-05-06T08:03:51.575198+00:00",
+                                            "category": {
+                                                "updated_at": "2025-05-06T08:01:11.585038+00:00",
+                                                "id": 2,
+                                                "name": "boots",
+                                                "created_at": "2025-05-06T08:01:11.585038+00:00"
+                                            }
+                                        },
+                                        "color": {
+                                            "name": "black, white,red",
+                                            "created_at": "2025-05-06T07:10:11.435277+00:00",
+                                            "id": 1,
+                                            "updated_at": "2025-05-06T07:10:11.435277+00:00",
+                                            "base_colors": [
+                                                {
+                                                    "id": 1,
+                                                    "created_at": "2025-05-06T10:08:56+00:00",
+                                                    "name": "black",
+                                                    "hex": "000000",
+                                                    "updated_at": "2025-05-06T10:08:58+00:00"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "created_at": "2025-05-06T07:09:33.610019+00:00",
+                                                    "name": "white",
+                                                    "hex": "ffffff",
+                                                    "updated_at": "2025-05-06T07:09:33.610019+00:00"
+                                                },
+                                                {
+                                                    "id": 3,
+                                                    "created_at": "2025-05-06T07:09:46.459870+00:00",
+                                                    "name": "red",
+                                                    "hex": "ff0000",
+                                                    "updated_at": "2025-05-06T07:09:46.459870+00:00"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+            }
+        }
+    }
+})
+def get_orders(client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        order_obj = session.query(Order).options(
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.size_grid).subqueryload(SizeGrid.size),
+        ).filter_by(client_id=client.id, status_id=Order.STATUS_NEW_ID).one_or_none()
+    return order_obj

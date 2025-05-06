@@ -24,3 +24,7 @@ alembic upgrade head
 import os
 >>> import binascii
 >>> binascii.hexlify(os.urandom(24))
+
+– Получение корзины конкретного клиента, а не всех заказов.
+– Изменение количества товара в корзине.
+– Удаление товара из корзины.
