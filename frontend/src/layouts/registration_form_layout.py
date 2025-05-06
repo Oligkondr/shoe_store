@@ -29,6 +29,7 @@ from ..utils import (
     validate_registration_password2,
 )
 from ..widgets import ClickableWidget, OverlayWidget, PhoneInputWidget
+from ..classes import RequestThread
 
 
 class RegistrationFormLayout(QVBoxLayout):
@@ -259,27 +260,31 @@ class RegistrationFormLayout(QVBoxLayout):
             "surname": self._inputs[self._InputName.SURNAME].text().strip(),
         }
         data_json = json.dumps(data)
-        
-        try:
-            response = requests.post(url, data=data_json)
 
+        thread = session.new_thread(
+            RequestThread(method="POST", url=url, data=data_json)
+        )
+        thread.finished.connect(self._handle_registration_response)
+        thread.start()
+
+    def _handle_registration_response(self, response, thread):
+        session.delete_thread(thread)
+
+        if isinstance(response, Exception):
+            print(response)
+            show_error_window()
+        else:
+            data = json.loads(response.text)
             if response.status_code == 200:
                 session.login_email = data["email"]
                 session.registration_name = data["name"]
                 self._parent_window.show_success_registration_message()
-                self._parent_window.hide_overlay()
             elif response.status_code == 401:
-                data = json.loads(response.text)
                 self._show_register_error(data["detail"])
-                self._parent_window.hide_overlay()
             else:
                 show_error_window()
-                self._parent_window.hide_overlay()
-        except Exception as error:
-            print(error)
-            show_error_window()
-            self._parent_window.hide_overlay()
-            
+
+        self._parent_window.hide_overlay()
 
     def _show_register_error(self, error_text):
         self._register_error.setText(error_text)

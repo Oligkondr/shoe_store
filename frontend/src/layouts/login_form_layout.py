@@ -27,6 +27,7 @@ from ..utils import (
     show_error_window,
 )
 from ..widgets import ClickableWidget, OverlayWidget
+from ..classes import RequestThread
 
 
 class LoginFormLayout(QVBoxLayout):
@@ -64,7 +65,7 @@ class LoginFormLayout(QVBoxLayout):
 
         self._init_ui()
         self._connect_signals()
-        
+
         if session.login_email is not None:
             self._inputs[self._InputName.EMAIL].setText(session.login_email)
 
@@ -188,24 +189,32 @@ class LoginFormLayout(QVBoxLayout):
         }
         data_json = json.dumps(data)
 
-        try:
-            response = requests.post(url, data=data_json)
+        thread = session.new_thread(
+            RequestThread(method="POST", url=url, data=data_json)
+        )
+        thread.finished.connect(self._handle_login_response)
+        thread.start()
 
+    def _handle_login_response(self, response, thread):
+        session.delete_thread(thread)
+
+        if isinstance(response, Exception):
+            print(response)
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            data = json.loads(response.text)
             if response.status_code == 200:
-                data = json.loads(response.text)
                 session.token = data["token"]
                 self._parent_window.show_main_window()
             elif response.status_code == 401:
-                data = json.loads(response.text)
                 self._show_login_error(data["detail"])
                 self._parent_window.hide_overlay()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
-        except Exception as error:
-            print(error)
-            show_error_window()
-            self._parent_window.hide_overlay()
+
+        self._parent_window.hide_overlay()
 
     def _show_login_error(self, error_text):
         self._parent_window.hide_overlay()

@@ -75,13 +75,14 @@ class CatalogLayout(QVBoxLayout):
         columns =  (self._scroll_area.viewport().width() - 20) // 200
         if columns != self._curr_columns:
             self._curr_columns = columns
-            print (self._items_layout)
-            clear_layout(self._items_layout)
-            for i in range(5):
-                widget = CatalogItemWidget({})
-                row = i // self._curr_columns
-                column = i % self._curr_columns
-                self._items_layout.addWidget(widget, row, column)
+            if self._items_layout is not None:
+                clear_layout(self._items_layout)
+                for i in range(5):
+                    widget = CatalogItemWidget({})
+                    row = i // self._curr_columns
+                    column = i % self._curr_columns
+                    self._items_layout.addWidget(widget, row, column)
+            
 
     def resize_catalog(self):
         self._init_items_ui()
