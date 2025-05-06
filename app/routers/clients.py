@@ -63,7 +63,7 @@ def login_client(client: UserAuthRequest):
 @clients_router.post('/product', summary='Add product to order')
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        order_obj = first_or_create(session, Order, None, client_id=client.id, status_id=Order.STATUS_NEW_ID)
+        order_obj = client.get_current_order()
 
         stmt = select(Product).where(Product.id == data.id)
         result = session.execute(stmt)
@@ -80,4 +80,6 @@ def add_product(data: ClientProductRequest, client: Client = Depends(get_current
 
         session.commit()
 
-    return new_order_product
+        order_obj.update_price()
+
+    return {'success': True}
