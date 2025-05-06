@@ -6,7 +6,7 @@ from app.auth.auth_handler import create_access_token, verify_password, get_curr
 from app.database import session_maker
 from app.requests import AdminCreateRequest, UserAuthRequest
 
-from app.models import Admin, Product, ModelColor, Color, Model
+from app.models import Admin, Product, ModelColor, Color, Model, SizeGrid
 from app.responses.responses import UserRegisterResponse, UserLoginResponse
 
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
@@ -68,84 +68,106 @@ def login_admin(admin: UserAuthRequest):
                     [
                         {
                             "model_color_id": 1,
-                            "quantity": 5000,
-                            "created_at": "2025-05-03T09:24:38.461000+00:00",
-                            "size_id": 1,
-                            "price": 5490,
                             "id": 1,
-                            "updated_at": "2025-05-03T09:24:39.278000+00:00",
+                            "updated_at": "2025-05-06T07:12:51.945606+00:00",
+                            "price": 5490,
+                            "created_at": "2025-05-06T07:12:51.945606+00:00",
                             "model_color": {
-                                "name": "bloody black",
-                                "id": 1,
-                                "updated_at": "2025-05-03T09:21:26.522000+00:00",
+                                "name": "Bloody Black",
                                 "model_id": 1,
                                 "color_id": 1,
-                                "created_at": "2025-05-03T09:21:24.919000+00:00",
-                                "model": {
-                                    "name": "super_sneaker",
-                                    "category_id": 1,
-                                    "created_at": "2025-05-03T09:17:49.297000+00:00",
-                                    "description": "best shoes",
-                                    "sex_id": 2,
-                                    "id": 1,
-                                    "updated_at": "2025-05-03T09:17:50.654000+00:00",
-                                    "category": {
-                                        "name": "sneakers",
-                                        "updated_at": "2025-05-03T09:15:40.093000+00:00",
-                                        "id": 1,
-                                        "created_at": "2025-05-03T09:15:38.225000+00:00"
-                                    }
-                                },
+                                "updated_at": "2025-05-06T07:12:35.862637+00:00",
+                                "id": 1,
+                                "created_at": "2025-05-06T07:12:35.862637+00:00",
                                 "color": {
-                                    "created_at": "2025-05-03T09:14:25.981000+00:00",
                                     "id": 1,
-                                    "name": "black, white, red",
-                                    "updated_at": "2025-05-03T09:14:27.501000+00:00",
+                                    "created_at": "2025-05-06T07:10:11.435277+00:00",
+                                    "updated_at": "2025-05-06T07:10:11.435277+00:00",
+                                    "name": "black, white,red",
                                     "base_colors": [
                                         {
-                                            "id": 1,
+                                            "name": "black",
+                                            "created_at": "2025-05-06T10:08:56+00:00",
                                             "hex": "000000",
-                                            "updated_at": "2025-05-03T09:12:30.148000+00:00",
-                                            "created_at": "2025-05-03T09:12:28.622000+00:00",
-                                            "name": "black"
+                                            "updated_at": "2025-05-06T10:08:58+00:00",
+                                            "id": 1
                                         },
                                         {
-                                            "id": 2,
+                                            "name": "white",
+                                            "created_at": "2025-05-06T07:09:33.610019+00:00",
                                             "hex": "ffffff",
-                                            "updated_at": "2025-05-03T09:12:48.892000+00:00",
-                                            "created_at": "2025-05-03T09:12:46.043000+00:00",
-                                            "name": "white"
+                                            "updated_at": "2025-05-06T07:09:33.610019+00:00",
+                                            "id": 2
                                         },
                                         {
-                                            "id": 3,
-                                            "hex": "ff3333",
-                                            "updated_at": "2025-05-03T09:23:13.681000+00:00",
-                                            "created_at": "2025-05-03T09:23:12.290000+00:00",
-                                            "name": "red"
+                                            "name": "red",
+                                            "created_at": "2025-05-06T07:09:46.459870+00:00",
+                                            "hex": "ff0000",
+                                            "updated_at": "2025-05-06T07:09:46.459870+00:00",
+                                            "id": 3
                                         }
                                     ]
+                                },
+                                "model": {
+                                    "description": "Super sneakers",
+                                    "name": "Sneakers",
+                                    "id": 1,
+                                    "updated_at": "2025-05-06T07:11:44.646189+00:00",
+                                    "sex_id": 2,
+                                    "category_id": 1,
+                                    "created_at": "2025-05-06T07:11:44.646189+00:00",
+                                    "category": {
+                                        "updated_at": "2025-05-06T07:11:40.030859+00:00",
+                                        "name": "sneakers",
+                                        "id": 1,
+                                        "created_at": "2025-05-06T07:11:40.030859+00:00"
+                                    }
                                 }
                             },
-                            "size": {
-                                "cm": "28",
-                                "id": 1,
-                                "updated_at": "2025-05-03T09:11:37.359000+00:00",
-                                "created_at": "2025-05-03T09:11:35.912000+00:00",
-                                "ru": "43"
-                            }
+                            "size_grid": [
+                                {
+                                    "size_id": 1,
+                                    "created_at": "2025-05-06T07:34:42.153756+00:00",
+                                    "quantity": 200,
+                                    "product_id": 1,
+                                    "id": 1,
+                                    "updated_at": "2025-05-06T07:34:42.153756+00:00",
+                                    "size": {
+                                        "created_at": "2025-05-06T07:15:30.350688+00:00",
+                                        "ru": "43",
+                                        "cm": "28",
+                                        "id": 1,
+                                        "updated_at": "2025-05-06T07:15:30.350688+00:00"
+                                    }
+                                },
+                                {
+                                    "size_id": 2,
+                                    "created_at": "2025-05-06T07:41:46.584329+00:00",
+                                    "quantity": 159,
+                                    "product_id": 1,
+                                    "id": 2,
+                                    "updated_at": "2025-05-06T07:41:46.584329+00:00",
+                                    "size": {
+                                        "created_at": "2025-05-06T07:41:28.958393+00:00",
+                                        "ru": "44",
+                                        "cm": "29",
+                                        "id": 2,
+                                        "updated_at": "2025-05-06T07:41:28.958393+00:00"
+                                    }
+                                }
+                            ]
                         }
                     ]
             }
         }
     }
-
 })
 def get_all_products():
     with (session_maker() as session):
         smtm = select(Product).options(
             joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
             joinedload(Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Product.size),
+            joinedload(Product.size_grid).subqueryload(SizeGrid.size),
         )
         result = session.execute(smtm).unique().scalars().all()
     return result

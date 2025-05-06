@@ -1,5 +1,4 @@
 import bcrypt
-from select import select
 from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
@@ -17,6 +16,8 @@ class PasswordEncryption:
 
 
 class Admin(Base, PasswordEncryption):
+    # __json_exclude__ = set(['password'])
+
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     phone: Mapped[str] = mapped_column(String[10], unique=True)
@@ -92,20 +93,28 @@ class OrderProduct(Base):
 
 class Product(Base):
     model_color_id: Mapped[int] = mapped_column(ForeignKey('model_colors.id'))
-    size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'))
     price: Mapped[int] = mapped_column(server_default=text("0"))
-    quantity: Mapped[int] = mapped_column(SmallInteger)
 
     model_color = relationship("ModelColor", back_populates="products")
-    size = relationship('Size', back_populates='products')
     order_products = relationship("OrderProduct", back_populates="product")
+
+    size_grid = relationship("SizeGrid", back_populates="product")
 
 
 class Size(Base):
     ru: Mapped[str] = mapped_column(String[6])
     cm: Mapped[str] = mapped_column(String[6])
 
-    products = relationship('Product', back_populates='size')
+    size_grid = relationship("SizeGrid", back_populates="size")
+
+
+class SizeGrid(Base):
+    size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'))
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
+    quantity: Mapped[int] = mapped_column(SmallInteger)
+
+    product = relationship('Product', back_populates='size_grid')
+    size = relationship('Size', back_populates='size_grid')
 
 
 class ModelColor(Base):

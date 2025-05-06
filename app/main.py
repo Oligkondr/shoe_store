@@ -4,5 +4,11 @@ from app.routers.clients import clients_router
 
 app = FastAPI()
 
+
+@app.get("/test")
+def test():
+    return {'message': True}
+
+
 app.include_router(admins_router)
 app.include_router(clients_router)
