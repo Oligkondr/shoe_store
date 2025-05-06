@@ -1,16 +1,54 @@
-# Рекурсивное удаление всех дочерних элементов Layout'а
-def clear_layout(layout):
+from PyQt5.QtWidgets import QWidget, QLayout
+from typing import Optional
+
+
+def delete_layout(layout: Optional[QLayout]):
+    """
+    Рекурсивно удаляет все дочерние элементы QLayout'а
+    и сам QLayout после этого.
+    """
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget() is not None:
+            child.widget().deleteLater()
+        elif child.layout() is not None:
+            delete_layout(child.layout())
+    QWidget().setLayout(layout)
+
+
+def delete_widget(widget: QWidget):
+    """
+    Удаляет виджет.
+    """
+    layout = widget.layout()
     if layout is not None:
-        while layout.count():
-            child = layout.takeAt(0)
-            if child.widget() is not None:
-                child.widget().deleteLater()
-            elif child.layout() is not None:
-                clear_layout(child.layout())
+        delete_layout(layout)
+    widget.setParent(None)
+    widget.deleteLater()
+
+
+def replace_widget_in_layout(layout: QLayout, old_widget: QWidget, new_widget: QWidget):
+    """
+    Заменяет виджет в QLayout'е.
+    
+    [ВАЖНО]
+        old_widget должен находиться непосредственно в layout'е,
+        иначе замены не произойдёт.
+    """
+    index = layout.indexOf(old_widget)
+    if index == -1:
+        return
+
+    item = layout.takeAt(index)
+    widget = item.widget()
+    if widget is not None:
+        delete_widget(widget)
+
+    layout.insertWidget(index, new_widget)
 
 
 # Имитация работы с СSS-классами, как в JS
-def add_class(widget, *classes_to_add):
+def add_class(widget: QWidget, *classes_to_add: str):
     curr_class_str = widget.property("class")
     if curr_class_str is None:
         curr_class_str = ""
@@ -19,7 +57,7 @@ def add_class(widget, *classes_to_add):
     widget.setProperty("class", " ".join(new_classes))
 
 
-def remove_class(widget, *classes_to_remove):
+def remove_class(widget: QWidget, *classes_to_remove: str):
     curr_class_str = widget.property("class")
     if curr_class_str is None:
         curr_class_str = ""
@@ -28,7 +66,7 @@ def remove_class(widget, *classes_to_remove):
     widget.setProperty("class", " ".join(new_classes))
 
 
-def toggle_class(widget, class_to_toggle, force=None):
+def toggle_class(widget: QWidget, class_to_toggle: str, force: Optional[bool] = None):
     curr_class_str = widget.property("class")
     if curr_class_str is None:
         curr_class_str = ""

@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
-from ..utils import get_absolute_path, clear_layout
+from ..utils import get_absolute_path, delete_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout, CatalogLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
 
@@ -83,12 +83,12 @@ class MainWindow(QWidget):
     def _render_form_layout(self, new_layout):
         curr_layout = self._main_container.layout()
         if curr_layout is not None:
-            clear_layout(curr_layout)
+            delete_layout(curr_layout)
             QWidget().setLayout(curr_layout)
         self._main_container.setLayout(new_layout)
 
     def show_catalog(self):
-        self._render_form_layout(CatalogLayout(self.show_overlay, self.hide_overlay))
+        self._render_form_layout(CatalogLayout(self))
 
     def show_overlay(self):
         self._overlay.resize()

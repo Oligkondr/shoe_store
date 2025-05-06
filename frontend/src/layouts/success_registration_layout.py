@@ -29,10 +29,10 @@ from ..widgets import ClickableWidget, OverlayWidget
 
 
 class SuccessRegistrationLayout(QVBoxLayout):
-    def __init__(self, show_login_form):
+    def __init__(self, parent_window):
         super().__init__()
 
-        self._show_login_form = show_login_form
+        self._parent_window = parent_window
         self._login_btn = QPushButton()
 
         self._init_ui()
@@ -79,4 +79,4 @@ class SuccessRegistrationLayout(QVBoxLayout):
 
     def _login_btn_handler(self):
         session.registration_name = None
-        self._show_login_form()
+        self._parent_window.show_registration_form()

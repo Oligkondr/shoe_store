@@ -1,4 +1,11 @@
-from .gui_utils import clear_layout, add_class, remove_class, toggle_class
+from .gui_utils import (
+    delete_layout,
+    delete_widget,
+    replace_widget_in_layout,
+    add_class,
+    remove_class,
+    toggle_class,
+)
 from .os_utils import get_absolute_path
 from .validation_utils import (
     validate_login_email,
@@ -12,7 +19,9 @@ from .validation_utils import (
 )
 
 __all__ = [
-    "clear_layout",
+    "delete_layout",
+    "delete_widget",
+    "replace_widget_in_layout",
     "add_class",
     "remove_class",
     "toggle_class",

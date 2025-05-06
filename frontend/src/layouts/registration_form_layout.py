@@ -39,19 +39,10 @@ class RegistrationFormLayout(QVBoxLayout):
         PASSWORD = 5
         PASSWORD2 = 6
 
-    def __init__(
-        self,
-        success_registration_handler,
-        back_btn_handler,
-        show_window_overlay,
-        hide_window_overlay,
-    ):
+    def __init__(self, parent_window):
         super().__init__()
 
-        self._success_registration_handler = success_registration_handler
-        self._back_btn_handler = back_btn_handler
-        self._show_window_overlay = show_window_overlay
-        self._hide_window_overlay = hide_window_overlay
+        self._parent_window = parent_window
 
         self._inputs = dict()
         self._errors = dict()
@@ -183,7 +174,7 @@ class RegistrationFormLayout(QVBoxLayout):
         self.addWidget(self._register_btn)
 
     def _connect_signals(self):
-        self._back_btn.clicked.connect(self._back_btn_handler)
+        self._back_btn.clicked.connect(self._parent_window.show_login_form)
 
         self._inputs[self._InputName.EMAIL].textChanged.connect(
             self._email_input_handler
@@ -254,7 +245,7 @@ class RegistrationFormLayout(QVBoxLayout):
 
     def _register_btn_handler(self):
         self._register_error.hide()
-        self._show_window_overlay()
+        self._parent_window.show_overlay()
 
         url = "http://127.0.0.1:8000/api/v1/register"
         data = {
@@ -268,11 +259,11 @@ class RegistrationFormLayout(QVBoxLayout):
         data_json = json.dumps(data)
 
         response = requests.post(url, data=data_json)
-        self._hide_window_overlay()
+        self._parent_window.hide_overlay()
         if response.status_code == 200:
             session.login_email = data["email"]
             session.registration_name = data["name"]
-            self._success_registration_handler()
+            self._parent_window.show_success_registration_message()
         else:
             pass
             

@@ -31,7 +31,7 @@ from ..utils import (
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget
 
 
-class CatalogLayout(QVBoxLayout):
+class CartLayout(QVBoxLayout):
     def __init__(self, parent_window):
         super().__init__()
         
