@@ -16,3 +16,5 @@ pip freeze > requirements.txt
 ___
 alembic revision --autogenerate -m "Initial revision"\
 alembic upgrade head
+
+test kjhFeawd
