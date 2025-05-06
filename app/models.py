@@ -1,8 +1,10 @@
 import bcrypt
-from select import select
-from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime
+from fastapi import HTTPException
+from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime, select
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
+
+from starlette import status
 
 from app.database import Base, session_maker, first_or_create
 from datetime import datetime
@@ -17,6 +19,8 @@ class PasswordEncryption:
 
 
 class Admin(Base, PasswordEncryption):
+    # __json_exclude__ = set(['password'])
+
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     phone: Mapped[str] = mapped_column(String[10], unique=True)
@@ -42,7 +46,7 @@ class Client(Base, PasswordEncryption):
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]
-    account: Mapped[int] = mapped_column(nullable=True)
+    account: Mapped[int] = mapped_column(nullable=True, default=0)
 
     orders = relationship("Order", back_populates='client')
 
@@ -79,6 +83,28 @@ class Order(Base):
     client = relationship("Client", back_populates="orders")
     order_products = relationship("OrderProduct", back_populates="order")
 
+    def update_price(self):
+        total = 0
+        with session_maker() as session:
+            order_obj = session.get(Order, self.id)
+
+            for product in order_obj.order_products:
+                total += product.price * product.quantity
+
+            order_obj.price = total
+
+            session.commit()
+
+    def payment(self, session):
+        client = self.client
+        if client.account < self.price:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Недостаточно денег")
+
+        client.account -= self.price
+
+        session.add(client)
+        session.commit()
+
 
 class OrderProduct(Base):
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
@@ -92,12 +118,11 @@ class OrderProduct(Base):
 
 class Product(Base):
     model_color_id: Mapped[int] = mapped_column(ForeignKey('model_colors.id'))
-    size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'))
     price: Mapped[int] = mapped_column(server_default=text("0"))
-    quantity: Mapped[int] = mapped_column(SmallInteger)
 
     model_color = relationship("ModelColor", back_populates="products")
-    size = relationship('Size', back_populates='products')
+    size_grid = relationship("SizeGrid", back_populates="product")
+
     order_products = relationship("OrderProduct", back_populates="product")
 
 
@@ -105,7 +130,16 @@ class Size(Base):
     ru: Mapped[str] = mapped_column(String[6])
     cm: Mapped[str] = mapped_column(String[6])
 
-    products = relationship('Product', back_populates='size')
+    size_grid = relationship("SizeGrid", back_populates="size")
+
+
+class SizeGrid(Base):
+    size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'))
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
+    quantity: Mapped[int] = mapped_column(SmallInteger)
+
+    product = relationship('Product', back_populates='size_grid')
+    size = relationship('Size', back_populates='size_grid')
 
 
 class ModelColor(Base):
