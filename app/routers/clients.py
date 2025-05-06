@@ -8,7 +8,8 @@ from starlette import status
 from app.auth.auth_handler import verify_password, create_access_token, get_current_client
 from app.models import Client, Order, Product, OrderProduct, ModelColor, SizeGrid, Color, Model
 from app.database import session_maker
-from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest
+from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest, \
+    ClientUpdateRequest
 from app.responses.responses import UserLoginResponse, UserRegisterResponse, ClientProductResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["client"])
@@ -227,7 +228,7 @@ def deposit(data: ClientDepositRequest, client: Client = Depends(get_current_cli
     }
 })
 def get_all_products():
-    with (session_maker() as session):
+    with session_maker() as session:
         smtm = select(Product).options(
             joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
             joinedload(Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
@@ -235,3 +236,48 @@ def get_all_products():
         )
         result = session.execute(smtm).unique().scalars().all()
     return result
+
+
+@clients_router.get('/profile', summary='Get client profile', responses={
+    200: {
+        "description": "Удачный ответ",
+        "content": {
+            "application/json": {
+                "example":
+                    {
+                        "email": "client1@mail.com",
+                        "phone": "phone1",
+                        "surname": "surname1",
+                        "id": 1,
+                        "updated_at": "2025-05-06T14:36:47.253135+00:00",
+                        "name": "name1",
+                        "password": "$2b$12$fDSmfGwhqvaItMi89.27se0ZtnlY8OKsME1qBgh5M3wxKcKLOMKmi",
+                        "account": 5701,
+                        "created_at": "2025-05-06T08:26:40.571876+00:00"
+                    }
+            }
+        }
+    }
+})
+def get_client_profile(client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        client_obj = session.get(Client, client.id)
+    return client_obj
+
+
+@clients_router.post('/profile', summary='Save profile changes')
+def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        client_obj = session.get(Client, client.id)
+
+        if not client_obj:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        client_obj.email = changes.email
+        client_obj.phone = changes.phone
+        client_obj.name = changes.name
+        client_obj.surname = changes.surname
+
+        session.commit()
+
+    return client_obj
