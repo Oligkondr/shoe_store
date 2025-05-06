@@ -209,7 +209,7 @@ def add_product(data: ClientProductRequest, client: Client = Depends(get_current
     return new_order_product
 
 
-@clients_router.post('/deposit', summary='Fill up account', responses={
+@clients_router.post('/deposit', summary='Add money on account', responses={
     200: {
         "description": "Удачный ответ",
         "content": {
@@ -493,7 +493,7 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
     }
 
 
-@clients_router.get('/orders', summary='Get client`s orders', responses={
+@clients_router.get('/orders', summary='Get client orders', responses={
     200: {
         "description": "Удачный ответ",
         "content": {
