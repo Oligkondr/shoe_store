@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLayout, QMessageBox
 from typing import Optional
 
 
-def delete_layout(layout: Optional[QLayout]):
+def clear_layout(layout: Optional[QLayout]):
     """
     Рекурсивно удаляет все дочерние элементы QLayout'а
     и сам QLayout после этого.
@@ -12,8 +12,7 @@ def delete_layout(layout: Optional[QLayout]):
         if child.widget() is not None:
             child.widget().deleteLater()
         elif child.layout() is not None:
-            delete_layout(child.layout())
-    QWidget().setLayout(layout)
+            clear_layout(child.layout())
 
 
 def delete_widget(widget: QWidget):
@@ -22,7 +21,8 @@ def delete_widget(widget: QWidget):
     """
     layout = widget.layout()
     if layout is not None:
-        delete_layout(layout)
+        clear_layout(layout)
+        QWidget.setLayout(layout)
     widget.setParent(None)
     widget.deleteLater()
 

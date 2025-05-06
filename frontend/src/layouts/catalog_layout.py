@@ -26,7 +26,7 @@ from ..utils import (
     toggle_class,
     validate_login_email,
     validate_login_password,
-    delete_layout,
+    clear_layout,
 )
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget
 
@@ -75,7 +75,8 @@ class CatalogLayout(QVBoxLayout):
         columns =  (self._scroll_area.viewport().width() - 20) // 200
         if columns != self._curr_columns:
             self._curr_columns = columns
-            delete_layout(self._items_layout)
+            print (self._items_layout)
+            clear_layout(self._items_layout)
             for i in range(5):
                 widget = CatalogItemWidget({})
                 row = i // self._curr_columns
