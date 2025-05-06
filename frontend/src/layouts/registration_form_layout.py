@@ -265,9 +265,11 @@ class RegistrationFormLayout(QVBoxLayout):
                 session.login_email = data["email"]
                 session.registration_name = data["name"]
                 self._parent_window.show_success_registration_message()
-            elif response.status_code == 400:
+                self._parent_window.hide_overlay()
+            elif response.status_code == 401:
                 data = json.loads(response.text)
-                self._show_regist_error(data["detail"])
+                self._show_register_error(data["detail"])
+                self._parent_window.hide_overlay()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()

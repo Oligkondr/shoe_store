@@ -18,7 +18,7 @@ from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
 from ..utils import get_absolute_path, delete_layout
-from ..layouts import LoginFormLayout, RegistrationFormLayout, CatalogLayout
+from ..layouts import CatalogLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
 
 

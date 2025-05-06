@@ -48,9 +48,6 @@ class LoginFormLayout(QVBoxLayout):
             self._errors[input_name] = QLabel()
             self._inputs_validity[input_name] = None
 
-        if session.login_email is not None:
-            self._inputs[self._InputName.EMAIL].setText(session.login_email)
-
         self._validators = {
             self._InputName.EMAIL: validate_login_email,
             self._InputName.PASSWORD: validate_login_password,
@@ -67,6 +64,9 @@ class LoginFormLayout(QVBoxLayout):
 
         self._init_ui()
         self._connect_signals()
+        
+        if session.login_email is not None:
+            self._inputs[self._InputName.EMAIL].setText(session.login_email)
 
     def _init_ui(self):
         self.setSpacing(0)
@@ -149,8 +149,8 @@ class LoginFormLayout(QVBoxLayout):
         self.addSpacing(30)
         self.addWidget(self._login_error, alignment=Qt.AlignHCenter)
         self.addWidget(self._login_btn)
-        self.addSpacing(6)
-        self.addWidget(self._employee_login_btn, alignment=Qt.AlignHCenter)
+        # self.addSpacing(6)
+        # self.addWidget(self._employee_login_btn, alignment=Qt.AlignHCenter)
 
     def _connect_signals(self):
         self._inputs[self._InputName.EMAIL].textChanged.connect(
@@ -178,7 +178,7 @@ class LoginFormLayout(QVBoxLayout):
     def _login_btn_handler(self):
         self._login_error.hide()
         self._parent_window.show_overlay()
-        
+
         url = "http://127.0.0.1:8000/api/v1/login"
         data = {
             "email": self._inputs[self._InputName.EMAIL].text(),
@@ -191,10 +191,12 @@ class LoginFormLayout(QVBoxLayout):
 
             if response.status_code == 200:
                 data = json.loads(response.text)
-                pass
-            elif response.status_code == 400:
+                session.token = data["token"]
+                self._parent_window.show_main_window()
+            elif response.status_code == 401:
                 data = json.loads(response.text)
                 self._show_login_error(data["detail"])
+                self._parent_window.hide_overlay()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
@@ -202,7 +204,6 @@ class LoginFormLayout(QVBoxLayout):
             print(error)
             show_error_window()
             self._parent_window.hide_overlay()
-        
 
     def _show_login_error(self, error_text):
         self._parent_window.hide_overlay()

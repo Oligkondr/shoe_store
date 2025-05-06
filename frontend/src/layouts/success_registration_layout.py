@@ -79,4 +79,4 @@ class SuccessRegistrationLayout(QVBoxLayout):
 
     def _login_btn_handler(self):
         session.registration_name = None
-        self._parent_window.show_registration_form()
+        self._parent_window.show_login_form()
