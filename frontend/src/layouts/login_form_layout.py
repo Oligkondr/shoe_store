@@ -24,6 +24,7 @@ from ..utils import (
     toggle_class,
     validate_login_email,
     validate_login_password,
+    show_error_window,
 )
 from ..widgets import ClickableWidget, OverlayWidget
 
@@ -177,22 +178,35 @@ class LoginFormLayout(QVBoxLayout):
     def _login_btn_handler(self):
         self._login_error.hide()
         self._parent_window.show_overlay()
-
+        
         url = "http://127.0.0.1:8000/api/v1/login"
         data = {
             "email": self._inputs[self._InputName.EMAIL].text(),
             "password": self._inputs[self._InputName.PASSWORD].text(),
         }
-
         data_json = json.dumps(data)
 
-        response = requests.post(url, data=data_json)
-        print("Status Code:", response.status_code)
-        print("Response Body:", response.text)
+        try:
+            response = requests.post(url, data=data_json)
 
-    def _show_login_error(self):
+            if response.status_code == 200:
+                data = json.loads(response.text)
+                pass
+            elif response.status_code == 400:
+                data = json.loads(response.text)
+                self._show_login_error(data["detail"])
+            else:
+                show_error_window()
+                self._parent_window.hide_overlay()
+        except Exception as error:
+            print(error)
+            show_error_window()
+            self._parent_window.hide_overlay()
+        
+
+    def _show_login_error(self, error_text):
         self._parent_window.hide_overlay()
-        self._login_error.setText("Неверный логин или пароль")
+        self._login_error.setText(error_text)
         self._login_error.show()
 
     def _validate_input(self, input_name):

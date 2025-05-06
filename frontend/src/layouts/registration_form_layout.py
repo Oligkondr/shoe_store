@@ -20,6 +20,7 @@ from ..utils import (
     add_class,
     remove_class,
     toggle_class,
+    show_error_window,
     validate_registration_email,
     validate_registration_name,
     validate_registration_surname,
@@ -255,19 +256,25 @@ class RegistrationFormLayout(QVBoxLayout):
             "name": self._inputs[self._InputName.NAME].text().strip(),
             "surname": self._inputs[self._InputName.SURNAME].text().strip(),
         }
-
         data_json = json.dumps(data)
+        
+        try:
+            response = requests.post(url, data=data_json)
 
-        response = requests.post(url, data=data_json)
-        self._parent_window.hide_overlay()
-        print("Status Code:", response.status_code)
-        print("Response Body:", response.text)
-        if response.status_code == 200:
-            session.login_email = data["email"]
-            session.registration_name = data["name"]
-            self._parent_window.show_success_registration_message()
-        else:
-            pass
+            if response.status_code == 200:
+                session.login_email = data["email"]
+                session.registration_name = data["name"]
+                self._parent_window.show_success_registration_message()
+            elif response.status_code == 400:
+                data = json.loads(response.text)
+                self._show_regist_error(data["detail"])
+            else:
+                show_error_window()
+                self._parent_window.hide_overlay()
+        except Exception as error:
+            print(error)
+            show_error_window()
+            self._parent_window.hide_overlay()
             
 
     def _show_register_error(self, error_text):

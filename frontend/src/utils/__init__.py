@@ -5,6 +5,7 @@ from .gui_utils import (
     add_class,
     remove_class,
     toggle_class,
+    show_error_window,
 )
 from .os_utils import get_absolute_path
 from .validation_utils import (
@@ -26,6 +27,7 @@ __all__ = [
     "remove_class",
     "toggle_class",
     "get_absolute_path",
+    "show_error_window",
     "validate_login_email",
     "validate_login_password",
     "validate_registration_email",
