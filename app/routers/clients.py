@@ -35,7 +35,8 @@ clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 def create_admin(client: ClientCreateRequest):
     with session_maker() as session:
         if session.query(Client).filter_by(email=client.email).first() is not None:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Client already registered")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Такой пользователь уже зарегистрирован")
 
         new_client = Client(
             email=client.email,
