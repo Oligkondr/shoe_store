@@ -59,9 +59,16 @@ class Client(Base, PasswordEncryption):
             'account': self.account,
         }
 
-    def get_current_order(self):
+    def get_or_create_current_order(self):
         with session_maker() as session:
             order_obj = first_or_create(session, Order, None, client_id=self.id, status_id=Order.STATUS_NEW_ID)
+        return order_obj
+
+    def get_current_order(self):
+        with session_maker() as session:
+            order_obj = session.query(Order).filter(client_id=self.id, status_id=Order.STATUS_NEW_ID).one_or_none()
+            if order_obj is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Нет активной корзины")
         return order_obj
 
 

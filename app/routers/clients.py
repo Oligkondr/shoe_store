@@ -186,7 +186,7 @@ def login_client(client: UserAuthRequest):
 })
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        order_obj = client.get_current_order()
+        order_obj = client.get_or_create_current_order()
 
         stmt = select(Product).where(Product.id == data.id).options(
             joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
@@ -1049,3 +1049,15 @@ def get_orders(client: Client = Depends(get_current_client)):
                 Product.size_grid).subqueryload(SizeGrid.size),
         ).filter_by(client_id=client.id, status_id=Order.STATUS_NEW_ID).one_or_none()
     return order_obj
+
+
+# @clients_router.delete("/product", summary='Remove product from order')
+# def remove_product(client: Client = Depends(get_current_client)):
+#     with session_maker() as session:
+#         order_obj = client.get_current_order()
+#     return order_obj
+
+# @clients_router.patch("/product", summary='Change quantity of product in order')
+# def change_product_quantity(client: Client = Depends(get_current_client)):
+#     with session_maker() as session:
+#         pass
