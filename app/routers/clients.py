@@ -288,6 +288,14 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
 
 @clients_router.get('/orders', summary='Get client`s orders')
 def get_orders(client: Client = Depends(get_current_client)):
-    with session_maker() as session:
-        orders_obj = session.query(Order).options(joinedload(Order.order_products)).filter(Order.client_id == client.id).all()
+    with (session_maker() as session):
+        orders_obj = session.query(Order).options(
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
+            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
+                Product.size_grid).subqueryload(SizeGrid.size),
+        ).filter(
+            Order.client_id == client.id).all()
     return orders_obj

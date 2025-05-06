@@ -121,9 +121,9 @@ class Product(Base):
     price: Mapped[int] = mapped_column(server_default=text("0"))
 
     model_color = relationship("ModelColor", back_populates="products")
-    order_products = relationship("OrderProduct", back_populates="product")
-
     size_grid = relationship("SizeGrid", back_populates="product")
+
+    order_products = relationship("OrderProduct", back_populates="product")
 
 
 class Size(Base):
