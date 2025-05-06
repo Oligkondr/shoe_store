@@ -43,7 +43,7 @@ class Client(Base, PasswordEncryption):
     phone: Mapped[str] = mapped_column(String[10], unique=True)
     name: Mapped[str]
     surname: Mapped[str]
-    account: Mapped[int] = mapped_column(nullable=True)
+    account: Mapped[int] = mapped_column(nullable=True, default=0)
 
     orders = relationship("Order", back_populates='client')
 
@@ -91,6 +91,16 @@ class Order(Base):
             order_obj.price = total
 
             session.commit()
+
+    def payment(self, session):
+        client = self.client
+        if client.account < self.price:
+            raise Exception('Недостаточно денег')
+
+        client.account -= self.price
+
+        session.add(client)
+        session.commit()
 
 
 class OrderProduct(Base):

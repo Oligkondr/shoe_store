@@ -1,22 +1,26 @@
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy import select
 from starlette import status
 
 from app.auth.auth_handler import verify_password, create_access_token, get_current_client
 from app.models import Client, Order, Product, OrderProduct
-from app.database import session_maker, first_or_create
-from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest
-from app.responses.responses import UserLoginResponse, UserRegisterResponse
+from app.database import session_maker
+from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest
+from app.responses.responses import UserLoginResponse, UserRegisterResponse, ClientProductResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 
 
 @clients_router.get('/test', summary='Test get request')
-async def test():
+async def test(client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        order_obj = first_or_create(session, Order, None, client_id=2, status_id=Order.STATUS_NEW_ID)
-        order_products = order_obj.order_products
-    return order_products
+        order_obj = client.get_current_order()
+        order = session.get(Order, order_obj.id)
+        client = order.payment()
+
+    return client
 
 
 @clients_router.post('/test', summary='Test post request')
@@ -32,6 +36,7 @@ def create_admin(client: ClientCreateRequest):
             phone=client.phone,
             name=client.name,
             surname=client.surname,
+            # account=0
         )
         new_client.set_password(client.password)
 
@@ -60,7 +65,7 @@ def login_client(client: UserAuthRequest):
     return {'token': access_token}
 
 
-@clients_router.post('/product', summary='Add product to order')
+@clients_router.post('/product', summary='Add product to order', response_model=ClientProductResponse)
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
         order_obj = client.get_current_order()
@@ -81,5 +86,37 @@ def add_product(data: ClientProductRequest, client: Client = Depends(get_current
         session.commit()
 
         order_obj.update_price()
+
+    return {'success': True}
+
+
+@clients_router.post('/approve', summary='approve order')
+def approve(client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        order_obj = client.get_current_order()
+        order = session.get(Order, order_obj.id)
+        order_products = order.order_products
+
+        if len(order_products):
+            order.payment(session)
+
+            order.status_id = Order.STATUS_PAID_ID
+            order.approved_at = datetime.now()
+
+            session.add(order)
+            session.commit()
+        else:
+            raise Exception("Корзина пуста")
+
+    return {'success': True}
+
+
+@clients_router.post('/deposit', summary='fill up account')
+def deposit(data: ClientDepositRequest, client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        client.account += data.amount
+
+        session.add(client)
+        session.commit()
 
     return {'success': True}

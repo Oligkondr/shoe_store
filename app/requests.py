@@ -27,3 +27,7 @@ class UserAuthRequest(BaseModel):
 class ClientProductRequest(BaseModel):
     id: int
     quantity: int
+
+
+class ClientDepositRequest(BaseModel):
+    amount: int

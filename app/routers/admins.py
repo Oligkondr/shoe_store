@@ -173,46 +173,46 @@ def get_all_products():
     return result
 
 
-@admins_router.post('/products', summary='Create new product')
-def get_all_products():
-    return {'message': 'Create new product'}
-
-
-@admins_router.post(f'/products/{id}', summary='Change product')
-def get_all_products():
-    return {'message': 'Change product'}
-
-
-@admins_router.delete(f'/products/{id}', summary='Delete product')
-def get_all_products():
-    return {'message': 'Delete product'}
-
-
-@admins_router.post(f'/colors', summary='Create new color')
-def get_all_products():
-    return {'message': 'Create new color'}
-
-
-@admins_router.delete(f'/colors/{id}', summary='Delete color')
-def delete_color():
-    return {'message': 'Delete color'}
-
-
-@admins_router.get(f'/orders', summary='Get all orders')
-def get_all_orders():
-    return {'message': 'Get all orders'}
-
-
-@admins_router.post(f'/orders/{id}', summary='Change order status')
-def change_order_status():
-    return {'message': 'Change order status'}
-
-
-@admins_router.get(f'/profile', summary='Get profile info')
-def get_profile_info():
-    return {'message': 'Get profile info'}
-
-
-@admins_router.post(f'/profile/{id}', summary='Change profile info')
-def change_profile_info():
-    return {'message': 'Change profile info'}
+# @admins_router.post('/products', summary='Create new product')
+# def get_all_products():
+#     return {'message': 'Create new product'}
+#
+#
+# @admins_router.post(f'/products/{id}', summary='Change product')
+# def get_all_products():
+#     return {'message': 'Change product'}
+#
+#
+# @admins_router.delete(f'/products/{id}', summary='Delete product')
+# def get_all_products():
+#     return {'message': 'Delete product'}
+#
+#
+# @admins_router.post(f'/colors', summary='Create new color')
+# def get_all_products():
+#     return {'message': 'Create new color'}
+#
+#
+# @admins_router.delete(f'/colors/{id}', summary='Delete color')
+# def delete_color():
+#     return {'message': 'Delete color'}
+#
+#
+# @admins_router.get(f'/orders', summary='Get all orders')
+# def get_all_orders():
+#     return {'message': 'Get all orders'}
+#
+#
+# @admins_router.post(f'/orders/{id}', summary='Change order status')
+# def change_order_status():
+#     return {'message': 'Change order status'}
+#
+#
+# @admins_router.get(f'/profile', summary='Get profile info')
+# def get_profile_info():
+#     return {'message': 'Get profile info'}
+#
+#
+# @admins_router.post(f'/profile/{id}', summary='Change profile info')
+# def change_profile_info():
+#     return {'message': 'Change profile info'}

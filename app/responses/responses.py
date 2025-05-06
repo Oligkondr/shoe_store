@@ -7,3 +7,10 @@ class UserLoginResponse(BaseModel):
 
 class UserRegisterResponse(BaseModel):
     success: bool
+
+class ClientProductResponse(BaseModel):
+    success: bool
+
+class ClientPayResponse(BaseModel):
+    success: bool
+
