@@ -12,14 +12,14 @@ from app.responses.responses import UserRegisterResponse, UserLoginResponse
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
 
-@admins_router.get('/test', summary='Test get request')
-def get_test():
-    return {'message': 'Test get request'}
-
-
-@admins_router.post('/test', summary='Test post request')
-def post_test(admin: Admin = Depends(get_current_admin)):
-    return {'message': admin}
+# @admins_router.get('/test', summary='Test get request')
+# def get_test():
+#     return {'message': 'Test get request'}
+#
+#
+# @admins_router.post('/test', summary='Test post request')
+# def post_test(admin: Admin = Depends(get_current_admin)):
+#     return {'message': admin}
 
 
 @admins_router.post("/register", summary='Create new admin', response_model=UserRegisterResponse)
@@ -171,7 +171,6 @@ def get_all_products():
         )
         result = session.execute(smtm).unique().scalars().all()
     return result
-
 
 # @admins_router.post('/products', summary='Create new product')
 # def get_all_products():

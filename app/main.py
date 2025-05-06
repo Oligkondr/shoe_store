@@ -5,7 +5,7 @@ from app.routers.clients import clients_router
 app = FastAPI()
 
 
-@app.get("/test")
+@app.get("/test", summary='Server test')
 def test():
     return {'message': True}
 
