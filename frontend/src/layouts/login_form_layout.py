@@ -184,9 +184,9 @@ class LoginFormLayout(QVBoxLayout):
             "password": self._inputs[self._InputName.PASSWORD].text(),
         }
 
-        y = json.dumps(data)
+        data_json = json.dumps(data)
 
-        response = requests.post(url, json=y)
+        response = requests.post(url, data=data_json)
         print("Status Code:", response.status_code)
         print("Response Body:", response.text)
 

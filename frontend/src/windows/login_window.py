@@ -108,7 +108,7 @@ class LoginWindow(QWidget):
         self._render_form_layout(LoginFormLayout(self))
 
     def show_success_registration_message(self):
-        self._render_form_layout(SuccessRegistrationLayout(self.show_login_form))
+        self._render_form_layout(SuccessRegistrationLayout(self))
 
     def show_overlay(self):
         self._overlay.resize()

@@ -260,6 +260,8 @@ class RegistrationFormLayout(QVBoxLayout):
 
         response = requests.post(url, data=data_json)
         self._parent_window.hide_overlay()
+        print("Status Code:", response.status_code)
+        print("Response Body:", response.text)
         if response.status_code == 200:
             session.login_email = data["email"]
             session.registration_name = data["name"]
