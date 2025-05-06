@@ -33,6 +33,9 @@ def post_test(client: Client = Depends(get_current_client)):
 @clients_router.post('/register', summary='Create new client', response_model=UserRegisterResponse)
 def create_admin(client: ClientCreateRequest):
     with session_maker() as session:
+        if session.query(Client).filter_by(email=client.email).first() is not None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Client already registered")
+
         new_client = Client(
             email=client.email,
             phone=client.phone,
@@ -271,7 +274,7 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
         client_obj = session.get(Client, client.id)
 
         if not client_obj:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
         client_obj.email = changes.email
         client_obj.phone = changes.phone
