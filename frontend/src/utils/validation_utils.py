@@ -5,15 +5,6 @@ import re
 def validate_login_email(str):
     if len(str.strip()) == 0:
         return ValidationResult(False, "Заполните поле")
-    elif '@' not in str:
-        return ValidationResult(False, "Email должен содержать символ @")
-    parts = str.split('@')
-    if len(parts) != 2:
-        return ValidationResult(False, "Некорректный формат email")
-    elif len(parts[0]) == 0:
-        return ValidationResult(False, "Email должен содержать часть перед @")
-    elif len(parts[1]) == 0:
-        return ValidationResult(False, "Email должен содержать домен после @")
     else:
         return ValidationResult(True)
 
@@ -26,10 +17,15 @@ def validate_login_password(str):
 
 
 def validate_registration_email(str):
-    if len(str.strip()) == 0:
+    stripped_str = str.strip()
+    if len(stripped_str) == 0:
         return ValidationResult(False, "Заполните поле")
+    elif re.match(r"^[^@]+@[^@]+$", stripped_str) is None:
+        return ValidationResult(False, "Неверный формат email")
     else:
         return ValidationResult(True)
+        
+            
 
 
 def validate_registration_name(str):
@@ -61,13 +57,20 @@ def validate_registration_password(str):
     elif len(str) < 6 or len(str) > 12:
         return ValidationResult(False, "Пароль должен содержать от 6 до 12 символов")
     elif not any(c.isupper() for c in str):
-        return ValidationResult(False, "Пароль должен содержать хотя бы одну заглавную букву")
+        return ValidationResult(
+            False, "Пароль должен содержать хотя бы одну заглавную букву"
+        )
     elif not any(c.islower() for c in str):
-        return ValidationResult(False, "Пароль должен содержать хотя бы одну строчную букву")
+        return ValidationResult(
+            False, "Пароль должен содержать хотя бы одну строчную букву"
+        )
     elif not any(c.isdigit() for c in str):
         return ValidationResult(False, "Пароль должен содержать хотя бы одну цифру")
+    elif not any (c in " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~" for c in str):
+        return ValidationResult(False, "Пароль должен содержать хотя бы один специальный символ")
     else:
         return ValidationResult(True)
+
 
 def validate_registration_password2(str):
     if len(str.strip()) == 0:

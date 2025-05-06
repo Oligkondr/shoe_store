@@ -111,6 +111,7 @@ class RegistrationFormLayout(QVBoxLayout):
 
             add_class(self._errors[input_name], "error-text")
             self._errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self._errors[input_name].setWordWrap(True)
             self._errors[input_name].hide()
 
         self._inputs[self._InputName.EMAIL].setPlaceholderText("Email")
@@ -144,6 +145,7 @@ class RegistrationFormLayout(QVBoxLayout):
 
         add_class(self._register_error, "error-text", "error-text_above")
         self._register_error.setContentsMargins(0, 0, 0, 7)
+        self._register_error.setWordWrap(True)
         self._register_error.hide()
 
         self._register_btn.setText("Зарегистрироваться")

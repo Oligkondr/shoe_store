@@ -99,6 +99,7 @@ class LoginFormLayout(QVBoxLayout):
 
             add_class(self._errors[input_name], "error-text")
             self._errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self._errors[input_name].setWordWrap(True)
             self._errors[input_name].hide()
 
         self._inputs[self._InputName.EMAIL].setPlaceholderText("Email")
@@ -121,6 +122,7 @@ class LoginFormLayout(QVBoxLayout):
 
         add_class(self._login_error, "error-text")
         self._login_error.setContentsMargins(0, 0, 0, 7)
+        self._login_error.setWordWrap(True)
         self._login_error.hide()
 
         self._login_btn.setText("Войти")
