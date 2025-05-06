@@ -15,6 +15,6 @@ if __name__ == "__main__":
     for file in listdir(font_dir_path):
         QFontDatabase.addApplicationFont(path.join(font_dir_path, file))
 
-    window = LoginWindow()
+    window = MainWindow()
     window.show()
     sys.exit(app.exec_())
