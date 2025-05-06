@@ -70,7 +70,7 @@ def login_client(client: UserAuthRequest):
     return {'token': access_token}
 
 
-@clients_router.post('/product', summary='Add product to order', response_model=ClientProductResponse)
+@clients_router.post('/product', summary='Add product to order')
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
         order_obj = client.get_current_order()
@@ -92,7 +92,7 @@ def add_product(data: ClientProductRequest, client: Client = Depends(get_current
 
         order_obj.update_price()
 
-    return {'success': True}
+    return new_order_product
 
 
 @clients_router.post('/approve', summary='approve order')
@@ -111,9 +111,9 @@ def approve(client: Client = Depends(get_current_client)):
             session.add(order)
             session.commit()
         else:
-            raise Exception("Корзина пуста")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Корзина пуста")
 
-    return {'success': True}
+    return order
 
 
 @clients_router.post('/deposit', summary='fill up account')
@@ -124,7 +124,7 @@ def deposit(data: ClientDepositRequest, client: Client = Depends(get_current_cli
         session.add(client)
         session.commit()
 
-    return {'success': True}
+    return client
 
 
 @clients_router.get('/products', summary='Get all products', responses={
@@ -284,3 +284,10 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
         session.commit()
 
     return client_obj
+
+
+@clients_router.get('/orders', summary='Get client`s orders')
+def get_orders(client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        orders_obj = session.query(Order).options(joinedload(Order.order_products)).filter(Order.client_id == client.id).all()
+    return orders_obj

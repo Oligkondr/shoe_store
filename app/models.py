@@ -1,7 +1,10 @@
 import bcrypt
+from fastapi import HTTPException
 from sqlalchemy import ForeignKey, text, String, SmallInteger, Table, Column, DateTime, select
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from typing import List
+
+from starlette import status
 
 from app.database import Base, session_maker, first_or_create
 from datetime import datetime
@@ -95,7 +98,7 @@ class Order(Base):
     def payment(self, session):
         client = self.client
         if client.account < self.price:
-            raise Exception('Недостаточно денег')
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Недостаточно денег")
 
         client.account -= self.price
 
