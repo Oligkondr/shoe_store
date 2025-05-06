@@ -35,8 +35,12 @@ clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 def create_admin(client: ClientCreateRequest):
     with session_maker() as session:
         if session.query(Client).filter_by(email=client.email).first() is not None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="Такой пользователь уже зарегистрирован")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Пользователь с такой почтой уже зарегистрирован")
+
+        if session.query(Client).filter_by(phone=client.phone).first() is not None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Пользователь с таким номером уже зарегистрирован")
 
         new_client = Client(
             email=client.email,
@@ -50,11 +54,11 @@ def create_admin(client: ClientCreateRequest):
         session.commit()
 
     return {
-        'email': client.email,
-        'phone': client.phone,
-        'name': client.name,
-        'surname': client.surname,
-        'account': client.account,
+        'email': new_client.email,
+        'phone': new_client.phone,
+        'name': new_client.name,
+        'surname': new_client.surname,
+        'account': new_client.account,
     }
 
 
