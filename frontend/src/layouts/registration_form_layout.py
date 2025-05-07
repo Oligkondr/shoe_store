@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import (
-    QWidget,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -7,19 +6,16 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon
 
 from enum import Enum
-import requests
 import json
 from session import session
 
 from ..utils import (
     get_absolute_path,
     add_class,
-    remove_class,
-    toggle_class,
     show_error_window,
     validate_registration_email,
     validate_registration_name,
@@ -28,7 +24,8 @@ from ..utils import (
     validate_registration_password,
     validate_registration_password2,
 )
-from ..widgets import ClickableWidget, OverlayWidget, PhoneInputWidget
+from ..widgets import PhoneInputWidget
+from ..classes import RequestThread
 
 
 class RegistrationFormLayout(QVBoxLayout):
@@ -111,6 +108,7 @@ class RegistrationFormLayout(QVBoxLayout):
 
             add_class(self._errors[input_name], "error-text")
             self._errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self._errors[input_name].setWordWrap(True)
             self._errors[input_name].hide()
 
         self._inputs[self._InputName.EMAIL].setPlaceholderText("Email")
@@ -144,6 +142,8 @@ class RegistrationFormLayout(QVBoxLayout):
 
         add_class(self._register_error, "error-text", "error-text_above")
         self._register_error.setContentsMargins(0, 0, 0, 7)
+        self._register_error.setWordWrap(True)
+        self._register_error.setAlignment(Qt.AlignHCenter)
         self._register_error.hide()
 
         self._register_btn.setText("Зарегистрироваться")
@@ -192,6 +192,27 @@ class RegistrationFormLayout(QVBoxLayout):
         )
         self._inputs[self._InputName.PASSWORD2].textChanged.connect(
             self._password2_input_handler
+        )
+
+        # Переход к следующему полю после воода Enter
+        self._inputs[self._InputName.EMAIL].returnPressed.connect(
+            self._inputs[self._InputName.NAME].setFocus
+        )
+        self._inputs[self._InputName.NAME].returnPressed.connect(
+            self._inputs[self._InputName.SURNAME].setFocus
+        )
+        self._inputs[self._InputName.SURNAME].returnPressed.connect(
+            self._inputs[self._InputName.PHONE].setFocus
+        )
+        self._inputs[self._InputName.PHONE].returnPressed.connect(
+            self._inputs[self._InputName.PASSWORD].setFocus
+        )
+        self._inputs[self._InputName.PASSWORD].returnPressed.connect(
+            self._inputs[self._InputName.PASSWORD2].setFocus
+        )
+        # Автоматическая отправка формы при вводе Enter в последнем поле
+        self._inputs[self._InputName.PASSWORD2].returnPressed.connect(
+            self._register_btn.click
         )
 
         self._toggle_btns[self._InputName.PASSWORD].clicked.connect(
@@ -257,27 +278,30 @@ class RegistrationFormLayout(QVBoxLayout):
             "surname": self._inputs[self._InputName.SURNAME].text().strip(),
         }
         data_json = json.dumps(data)
-        
-        try:
-            response = requests.post(url, data=data_json)
 
+        thread = session.new_thread(
+            RequestThread(method="POST", url=url, data=data_json)
+        )
+        thread.finished.connect(self._handle_registration_response)
+        thread.start()
+
+    def _handle_registration_response(self, response, thread):
+        session.delete_thread(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+        else:
+            data = json.loads(response.text)
             if response.status_code == 200:
                 session.login_email = data["email"]
                 session.registration_name = data["name"]
                 self._parent_window.show_success_registration_message()
-                self._parent_window.hide_overlay()
             elif response.status_code == 401:
-                data = json.loads(response.text)
                 self._show_register_error(data["detail"])
-                self._parent_window.hide_overlay()
             else:
                 show_error_window()
-                self._parent_window.hide_overlay()
-        except Exception as error:
-            print(error)
-            show_error_window()
-            self._parent_window.hide_overlay()
-            
+
+        self._parent_window.hide_overlay()
 
     def _show_register_error(self, error_text):
         self._register_error.setText(error_text)

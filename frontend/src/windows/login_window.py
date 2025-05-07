@@ -1,21 +1,19 @@
 from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
-    QLineEdit,
     QPushButton,
-    QStackedWidget,
-    QFormLayout,
     QVBoxLayout,
-    QSpacerItem,
     QHBoxLayout,
     QGraphicsDropShadowEffect,
+    QApplication,
 )
 from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QIcon, QResizeEvent
+from PyQt5.QtGui import QColor, QIcon, QPixmap
 
-from ..utils import get_absolute_path, delete_layout
+from ..utils import get_absolute_path, clear_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout, SuccessRegistrationLayout
 from ..widgets import OverlayWidget
+
 
 class LoginWindow(QWidget):
     def __init__(self):
@@ -30,6 +28,8 @@ class LoginWindow(QWidget):
 
         self._init_ui()
         self.show_login_form()
+
+        QTimer.singleShot(0, self._center_window)
 
     def _init_ui(self):
         # Подключение файла стилей
@@ -59,9 +59,18 @@ class LoginWindow(QWidget):
         shadow_container_layout.setSpacing(0)
         shadow_container_layout.setContentsMargins(0, 0, 0, 0)
 
-        image_container = QWidget()
+        image_container = QLabel()
         image_container.setObjectName("login-image")
         image_container.setFixedWidth(350)
+
+        pixmap = QPixmap(
+            get_absolute_path(__file__, "../images/login_image.png")
+        ).scaled(
+            image_container.size(),
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation,
+        )
+        image_container.setPixmap(pixmap)
 
         ui_container = QWidget()
         ui_container.setFixedWidth(350)
@@ -97,7 +106,8 @@ class LoginWindow(QWidget):
     def _render_form_layout(self, new_layout):
         curr_layout = self._form_container.layout()
         if curr_layout is not None:
-            delete_layout(curr_layout)
+            clear_layout(curr_layout)
+            QWidget().setLayout(curr_layout)
         self._form_container.setLayout(new_layout)
 
     def show_registration_form(self):
@@ -115,12 +125,19 @@ class LoginWindow(QWidget):
 
     def hide_overlay(self):
         self._overlay.hide()
-    
-    def show_main_window(self):
-        from ..windows import MainWindow
-        MainWindow().show()
-        self.close()
-        
+
+    def _center_window(self):
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        screen_width = screen_geometry.width()
+        screen_height = screen_geometry.height()
+
+        window_width = self.width()
+        window_height = self.height()
+
+        x_pos = (screen_width - window_width) // 2
+        y_pos = (screen_height - window_height) // 2
+
+        self.move(x_pos, y_pos)
 
     # Перемещение окна
     def mousePressEvent(self, event):

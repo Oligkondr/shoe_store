@@ -17,4 +17,6 @@ ___
 alembic revision --autogenerate -m "Initial revision"\
 alembic upgrade head
 
-test kjhFeawd
+docker exec -i shoe_store_db pg_dump -U user -d shoe_store_db -F c -f /var/lib/postgresql/data/db.dump
+
+docker exec -i shoe_store_db pg_restore -U user -d shoe_store_db -F c /var/lib/postgresql/data/db.dump

@@ -1,5 +1,5 @@
 from .gui_utils import (
-    delete_layout,
+    clear_layout,
     delete_widget,
     replace_widget_in_layout,
     add_class,
@@ -20,7 +20,7 @@ from .validation_utils import (
 )
 
 __all__ = [
-    "delete_layout",
+    "clear_layout",
     "delete_widget",
     "replace_widget_in_layout",
     "add_class",
