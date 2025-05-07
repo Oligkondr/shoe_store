@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget,
+    QLabel,
     QPushButton,
     QVBoxLayout,
     QHBoxLayout,
@@ -7,7 +8,7 @@ from PyQt5.QtWidgets import (
     QApplication,
 )
 from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QIcon
+from PyQt5.QtGui import QColor, QIcon, QPixmap
 
 from ..utils import get_absolute_path, clear_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout, SuccessRegistrationLayout
@@ -58,9 +59,18 @@ class LoginWindow(QWidget):
         shadow_container_layout.setSpacing(0)
         shadow_container_layout.setContentsMargins(0, 0, 0, 0)
 
-        image_container = QWidget()
+        image_container = QLabel()
         image_container.setObjectName("login-image")
         image_container.setFixedWidth(350)
+
+        pixmap = QPixmap(
+            get_absolute_path(__file__, "../images/login_image.png")
+        ).scaled(
+            image_container.size(),
+            Qt.KeepAspectRatioByExpanding,
+            Qt.SmoothTransformation,
+        )
+        image_container.setPixmap(pixmap)
 
         ui_container = QWidget()
         ui_container.setFixedWidth(350)
