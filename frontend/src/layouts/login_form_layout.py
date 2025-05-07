@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import (
-    QWidget,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -7,12 +6,11 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QByteArray, QUrl
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from enum import Enum
-import requests
+
 import json
 
 from session import session
@@ -20,13 +18,11 @@ from session import session
 from ..utils import (
     get_absolute_path,
     add_class,
-    remove_class,
-    toggle_class,
     validate_login_email,
     validate_login_password,
     show_error_window,
 )
-from ..widgets import ClickableWidget, OverlayWidget
+from ..classes import RequestThread
 
 
 class LoginFormLayout(QVBoxLayout):
@@ -64,7 +60,7 @@ class LoginFormLayout(QVBoxLayout):
 
         self._init_ui()
         self._connect_signals()
-        
+
         if session.login_email is not None:
             self._inputs[self._InputName.EMAIL].setText(session.login_email)
 
@@ -99,6 +95,7 @@ class LoginFormLayout(QVBoxLayout):
 
             add_class(self._errors[input_name], "error-text")
             self._errors[input_name].setContentsMargins(0, 2, 0, 0)
+            self._errors[input_name].setWordWrap(True)
             self._errors[input_name].hide()
 
         self._inputs[self._InputName.EMAIL].setPlaceholderText("Email")
@@ -121,6 +118,8 @@ class LoginFormLayout(QVBoxLayout):
 
         add_class(self._login_error, "error-text")
         self._login_error.setContentsMargins(0, 0, 0, 7)
+        self._login_error.setWordWrap(True)
+        self._login_error.setAlignment(Qt.AlignHCenter)
         self._login_error.hide()
 
         self._login_btn.setText("Войти")
@@ -147,7 +146,7 @@ class LoginFormLayout(QVBoxLayout):
         self.addLayout(password_layout)
         self.addWidget(self._errors[self._InputName.PASSWORD])
         self.addSpacing(30)
-        self.addWidget(self._login_error, alignment=Qt.AlignHCenter)
+        self.addWidget(self._login_error)
         self.addWidget(self._login_btn)
         # self.addSpacing(6)
         # self.addWidget(self._employee_login_btn, alignment=Qt.AlignHCenter)
@@ -158,6 +157,15 @@ class LoginFormLayout(QVBoxLayout):
         )
         self._inputs[self._InputName.PASSWORD].textChanged.connect(
             self._password_input_handler
+        )
+
+        # Переход к следующему полю после воода Enter
+        self._inputs[self._InputName.EMAIL].returnPressed.connect(
+            self._inputs[self._InputName.PASSWORD].setFocus
+        )
+        # Автоматическая отправка формы при вводе Enter в последнем поле
+        self._inputs[self._InputName.PASSWORD].returnPressed.connect(
+            self._login_btn.click
         )
 
         self._password_toggle_btn.clicked.connect(self._toggle_password_visibility)
@@ -186,24 +194,35 @@ class LoginFormLayout(QVBoxLayout):
         }
         data_json = json.dumps(data)
 
-        try:
-            response = requests.post(url, data=data_json)
+        thread = session.new_thread(
+            RequestThread(method="POST", url=url, data=data_json)
+        )
+        thread.finished.connect(self._handle_login_response)
+        thread.start()
 
+    def _handle_login_response(self, response, thread):
+        session.delete_thread(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            data = json.loads(response.text)
             if response.status_code == 200:
-                data = json.loads(response.text)
                 session.token = data["token"]
-                self._parent_window.show_main_window()
+                from ..windows import MainWindow
+
+                session.curr_window = MainWindow()
+                session.curr_window.show()
+                self._parent_window.close()
             elif response.status_code == 401:
-                data = json.loads(response.text)
                 self._show_login_error(data["detail"])
                 self._parent_window.hide_overlay()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
-        except Exception as error:
-            print(error)
-            show_error_window()
-            self._parent_window.hide_overlay()
+
+        self._parent_window.hide_overlay()
 
     def _show_login_error(self, error_text):
         self._parent_window.hide_overlay()

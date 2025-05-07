@@ -10,7 +10,7 @@ pip install -r requirements.txt
 **Файл создается заново с библиотеками которые у вас установленны, а не дописывает их.**
 
 ```
-pip install -r requirements.txt
+pip freeze > requirements.txt
 ```
 
 ___
