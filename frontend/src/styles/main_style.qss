@@ -6,6 +6,11 @@ QWidget {
     margin: 0;
     background: none;
     background-color: #ffffff;
+    border: none;
+}
+
+#header {
+    border-bottom: 1px solid #dcdcdc
 }
 
 .main-btn {
@@ -48,6 +53,9 @@ QWidget {
 
 .title-text {
     font-size: 28px;
+    font-weight: 800;
+}
+.bold-text {
     font-weight: 800;
 }
 .small-text {

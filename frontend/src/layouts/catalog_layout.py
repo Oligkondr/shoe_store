@@ -27,8 +27,10 @@ from ..utils import (
     validate_login_email,
     validate_login_password,
     clear_layout,
+    show_error_window,
 )
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget
+from ..classes import RequestThread
 
 
 class CatalogLayout(QVBoxLayout):
@@ -44,7 +46,6 @@ class CatalogLayout(QVBoxLayout):
         self._scroll_area = QScrollArea()
         
         self._init_ui()
-        QTimer.singleShot(0, self._init_items_ui)
 
     def _init_ui(self):
         self.setContentsMargins(0, 0, 0, 0)
@@ -68,9 +69,41 @@ class CatalogLayout(QVBoxLayout):
         self._scroll_area.setWidget(centering_layout_container)
 
         self.addWidget(self._scroll_area)
-    
         
-    
+        self._get_items()
+
+        QTimer.singleShot(0, self._init_items_ui)
+            
+    def _get_items(self):
+        self._parent_window.show_overlay()
+
+        url = "http://127.0.0.1:8000/api/v1/products"
+        headers = {
+            "token": session.token,
+        }
+        
+        thread = session.new_thread(
+            RequestThread(method="GET", url=url, headers=headers)
+        )
+        thread.finished.connect(self._handle_get_items_response)
+        thread.start()
+
+    def _handle_get_items_response(self, response, thread):
+        session.delete_thread(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            print(response.text)
+            data = json.loads(response.text)
+            if response.status_code == 200:
+                pass
+            else:
+                show_error_window()
+                self._parent_window.hide_overlay()
+        self._parent_window.hide_overlay()
+
     def _init_items_ui(self):
         columns =  (self._scroll_area.viewport().width() - 20) // 200
         if columns != self._curr_columns:
