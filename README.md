@@ -2,7 +2,9 @@
 
 1. [Download Docker](https://www.docker.com/products/docker-desktop/)
 
+
 2. Скопировать ***.env.example*** в ***.env***
+
 
 3. Запустить контейнер:
 
@@ -10,11 +12,11 @@
  docker-compose up -d
  ```
 
-4. Применить миграции:
+4. Восстановить dump
 
- ```
- alembic upgrade head
- ```
+```
+docker exec -i shoe_store_db pg_restore -U user -d shoe_store_db -F c /var/lib/postgresql/db.dump
+```
 
 5. Запустить uvicorn:
 
