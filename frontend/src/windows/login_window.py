@@ -1,17 +1,13 @@
 from PyQt5.QtWidgets import (
     QWidget,
-    QLabel,
-    QLineEdit,
     QPushButton,
-    QStackedWidget,
-    QFormLayout,
     QVBoxLayout,
-    QSpacerItem,
     QHBoxLayout,
     QGraphicsDropShadowEffect,
+    QApplication,
 )
 from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QIcon, QResizeEvent
+from PyQt5.QtGui import QColor, QIcon
 
 from ..utils import get_absolute_path, clear_layout
 from ..layouts import LoginFormLayout, RegistrationFormLayout, SuccessRegistrationLayout
@@ -31,6 +27,8 @@ class LoginWindow(QWidget):
 
         self._init_ui()
         self.show_login_form()
+
+        QTimer.singleShot(0, self._center_window)
 
     def _init_ui(self):
         # Подключение файла стилей
@@ -117,6 +115,19 @@ class LoginWindow(QWidget):
 
     def hide_overlay(self):
         self._overlay.hide()
+
+    def _center_window(self):
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+        screen_width = screen_geometry.width()
+        screen_height = screen_geometry.height()
+
+        window_width = self.width()
+        window_height = self.height()
+
+        x_pos = (screen_width - window_width) // 2
+        y_pos = (screen_height - window_height) // 2
+
+        self.move(x_pos, y_pos)
 
     # Перемещение окна
     def mousePressEvent(self, event):
