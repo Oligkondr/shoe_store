@@ -1,13 +1,13 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
-from app.auth.auth_handler import create_access_token, verify_password, get_current_admin
+from app.auth.auth_handler import create_access_token, verify_password
 from app.database import session_maker
 from app.requests import AdminCreateRequest, UserAuthRequest
 
 from app.models import Admin, Product, ModelColor, Color, Model, SizeGrid
-from app.responses.responses import UserRegisterResponse, UserLoginResponse
+from app.responses import UserRegisterResponse, UserLoginResponse
 
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 

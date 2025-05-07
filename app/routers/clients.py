@@ -10,21 +10,19 @@ from app.models import Client, Order, Product, OrderProduct, ModelColor, SizeGri
 from app.database import session_maker
 from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest, \
     ClientUpdateRequest
-from app.responses.responses import UserLoginResponse, ClientRegisterResponse
+from app.responses import UserLoginResponse, ClientRegisterResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["client"])
 
 
 # @clients_router.get('/test', summary='Test get request')
-# async def test(client: Client = Depends(get_current_client)):
-#     with session_maker() as session:
-#         order_obj = client.get_current_order()
-#         order = session.get(Order, order_obj.id)
-#         client = order.payment()
-#
-#     return client
-#
-#
+# async def test():
+#     # response = ErrorResponseModel(success=False, error='Error')
+#     # return ErrorResponseModel(success=False, error='Error')
+#     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+#                         detail="Пользователь с такой почтой уже зарегистрирован")
+
+
 # @clients_router.post('/test', summary='Test post request')
 # def post_test(client: Client = Depends(get_current_client)):
 #     return {'message': client}
@@ -385,6 +383,7 @@ def get_client_profile(client: Client = Depends(get_current_client)):
             'phone': client_obj.phone,
             'name': client_obj.name,
             'surname': client_obj.surname,
+            'account': client_obj.account,
         }
 
 
@@ -1049,7 +1048,6 @@ def get_orders(client: Client = Depends(get_current_client)):
                 Product.size_grid).subqueryload(SizeGrid.size),
         ).filter_by(client_id=client.id, status_id=Order.STATUS_NEW_ID).one_or_none()
     return order_obj
-
 
 # @clients_router.delete("/product", summary='Remove product from order')
 # def remove_product(client: Client = Depends(get_current_client)):

@@ -1,6 +1,16 @@
 from pydantic import BaseModel
 
 
+# class ResponseModel(BaseModel):
+#     success: bool
+#     data: Any
+#
+#
+# class ErrorResponseModel(BaseModel):
+#     success: bool
+#     error: str
+
+
 class UserLoginResponse(BaseModel):
     token: str
 
@@ -11,6 +21,7 @@ class ClientRegisterResponse(BaseModel):
     name: str
     surname: str
     account: int
+
 
 class ClientDepositResponse(BaseModel):
     email: str
