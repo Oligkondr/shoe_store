@@ -8,6 +8,7 @@ class ClickableWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._cursor_inside = False
+        self.setCursor(Qt.PointingHandCursor)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

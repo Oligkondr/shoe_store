@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLayout, QMessageBox
 from typing import Optional
 
 
-def clear_layout(layout: Optional[QLayout]):
+def clear_layout(layout: QLayout):
     """
     Рекурсивно удаляет все дочерние элементы QLayout'а
     и сам QLayout после этого.

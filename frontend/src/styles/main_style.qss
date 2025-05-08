@@ -6,21 +6,101 @@ QWidget {
     margin: 0;
     background: none;
     background-color: #ffffff;
+    color: #000000;
     border: none;
+    border-radius: 0;
 }
 
-#header {
-    border-bottom: 1px solid #dcdcdc
+QScrollBar:vertical {
+    background-color: #ffffff;
+    width: 10px;
+    margin: 0px;
+    border-radius: 0;
+    border: none;
+}
+QScrollBar::handle:vertical {
+    background-color: #dcdcdc;
+    min-height: 30px;
+    border: none;
+}
+QScrollBar::handle:vertical:hover {
+    background-color: #000000;
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background-color: hsl(0, 0%, 100%);
+    height: 10px;
+    margin: 0px;
+    border-radius: 0;
+    border: none;
+}
+QScrollBar::handle:horizontal {
+    background-color: #dcdcdc;
+    min-width: 30px;
+    border: none;
+}
+QScrollBar::handle:horizontal:hover {
+    background-color: #000000;
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+.catalog-item-title {
+    font-size: 14px;
+    font-weight: 800;
+}
+.catalog-item-text {
+    font-size: 12px;
+}
+.catalog-item-price {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.header-btn {
+    font-weight: 800;
+    padding-bottom: 1px;
 }
 
 .main-btn {
     background-color: #ffffff;
     font-weight: 800;
     border: 1px solid #000000;
+    padding-bottom: 1px;
 }
 .main-btn:hover {
     background-color: #000000;
     color: #ffffff;
+}
+.main-btn:disabled {
+    background-color: #ffffff;
+    color: #7f7f7f;
+    border-color: #dcdcdc;
+}
+
+.shoe-size-btn {
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    padding-bottom: 1px;
+}
+.shoe-size-btn:hover {
+    border-color: #000000;
+}
+.shoe-size-btn:checked {
+    font-weight: 800;
+    color: #ffffff;
+    background-color: #000000;
+    border-color: #000000;
+}
+.shoe-size-btn:disabled {
+    color: #7f7f7f;
+    border-color: #dcdcdc;
 }
 
 .main-btn_solid {
@@ -30,11 +110,6 @@ QWidget {
 .main-btn_solid:hover {
     background-color: #ffffff;
     color: #000000;
-}
-.main-btn_solid:disabled {
-    background-color: #ffffff;
-    color: #7f7f7f;
-    border-color: #dcdcdc;
 }
 
 

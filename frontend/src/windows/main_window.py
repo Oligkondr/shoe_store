@@ -55,25 +55,36 @@ class MainWindow(QWidget):
         header_layout.setContentsMargins(0, 0, 0, 0)
         header_layout.setSpacing(0)
 
-        self._logo_btn.setText("Лого")
         self._logo_btn.setFixedWidth(59)
         self._logo_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self._logo_btn.setCursor(Qt.PointingHandCursor)
+        self._logo_btn.setIcon(
+            QIcon(get_absolute_path(__file__, "../icons/logo_small.png"))
+        )
+        self._logo_btn.setIconSize(QSize(19, 16))
 
         self._catalog_btn.setText("Каталог")
-        self._catalog_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        add_class(self._catalog_btn, "bold-text")
+        self._catalog_btn.setFixedHeight(50)
+        self._catalog_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self._catalog_btn.setContentsMargins(0, -1, 0, 0)
+        add_class(self._catalog_btn, "header-btn")
         self._catalog_btn.setCursor(Qt.PointingHandCursor)
 
-        self._cart_btn.setText("Корзина")
+        self._cart_btn.setText("[0]")
         self._cart_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        add_class(self._cart_btn, "bold-text")
+        add_class(self._cart_btn, "header-btn")
         self._cart_btn.setCursor(Qt.PointingHandCursor)
+        self._cart_btn.setIcon(
+            QIcon(get_absolute_path(__file__, "../icons/cart.png"))
+        )
+        self._cart_btn.setIconSize(QSize(18, 18))
 
-        self._account_btn.setText("Профиль")
         self._account_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        add_class(self._account_btn, "bold-text")
         self._account_btn.setCursor(Qt.PointingHandCursor)
+        self._account_btn.setIcon(
+            QIcon(get_absolute_path(__file__, "../icons/account.png"))
+        )
+        self._account_btn.setIconSize(QSize(16, 16))
         
         separators = []
         for i in range(2):
@@ -98,17 +109,20 @@ class MainWindow(QWidget):
         header.setFixedHeight(50)
         header.setLayout(header_layout)
         
+        header_upperline = QWidget()
         header_underline = QWidget()
-        header_underline.setFixedHeight(1)
-        header_underline.setStyleSheet("background-color: #dcdcdc")
-        header_underline.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        for widget in [header_upperline, header_underline]:
+            widget.setFixedHeight(1)
+            widget.setStyleSheet("background-color: #dcdcdc")
+            widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
+        window_layout.addWidget(header_upperline, alignment=Qt.AlignTop)
         window_layout.addWidget(header, alignment=Qt.AlignTop)
         window_layout.addWidget(header_underline, alignment=Qt.AlignTop)
         window_layout.addWidget(self._main_container)
 
         self.setLayout(window_layout)
-        self.setMinimumSize(640, 480)
+        self.setMinimumSize(700, 500)
 
         self._overlay.setParent(self)
 

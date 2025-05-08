@@ -41,7 +41,7 @@ class CatalogLayout(QVBoxLayout):
         
         self._items = list()
 
-        self._curr_columns = 2
+        self._curr_columns = 0
         self._items_layout = QGridLayout()
         self._scroll_area = QScrollArea()
         
@@ -54,13 +54,14 @@ class CatalogLayout(QVBoxLayout):
         self._scroll_area.setWidgetResizable(True)
 
         self._items_layout.setContentsMargins(0, 0, 0, 0)
-        self._items_layout.setSpacing(20)
+        self._items_layout.setHorizontalSpacing(20)
+        self._items_layout.setVerticalSpacing(24)
 
         items_container = QWidget()
         items_container.setLayout(self._items_layout)
         
         centering_layout = QHBoxLayout()
-        centering_layout.setContentsMargins(20, 20, 20, 20)
+        centering_layout.setContentsMargins(30, 30, 30, 30)
         centering_layout.addWidget(items_container, alignment=Qt.AlignHCenter)
         
         centering_layout_container = QWidget()
@@ -70,7 +71,7 @@ class CatalogLayout(QVBoxLayout):
 
         self.addWidget(self._scroll_area)
         
-        self._get_items()
+        # self._get_items()
 
         QTimer.singleShot(0, self._init_items_ui)
             
@@ -105,12 +106,13 @@ class CatalogLayout(QVBoxLayout):
         self._parent_window.hide_overlay()
 
     def _init_items_ui(self):
-        columns =  (self._scroll_area.viewport().width() - 20) // 200
+        items_count = 100
+        columns =  (self._scroll_area.viewport().width() - 40) // 210
         if columns != self._curr_columns:
             self._curr_columns = columns
             if self._items_layout is not None:
                 clear_layout(self._items_layout)
-                for i in range(5):
+                for i in range(items_count):
                     widget = CatalogItemWidget({})
                     row = i // self._curr_columns
                     column = i % self._curr_columns

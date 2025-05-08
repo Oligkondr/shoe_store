@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 
 from ..widgets import ClickableWidget
 from ..utils import get_absolute_path, add_class
-
+from session import session
 
 class CatalogItemWidget(ClickableWidget):
     def __init__(self, item_data, parent=None):
@@ -17,18 +17,19 @@ class CatalogItemWidget(ClickableWidget):
         self._connect_signals()
 
     def _init_ui(self):
-        self.setFixedWidth(180)
+        self.setFixedWidth(190)
 
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         image_container = QLabel()
         pixmap = QPixmap(
             get_absolute_path(__file__, "../images/item_placeholder.png")
         )
         image_container.setPixmap(
-            pixmap.scaled(180, 180, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap.scaled(190, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
 
         title = QLabel()
@@ -36,18 +37,25 @@ class CatalogItemWidget(ClickableWidget):
         add_class(title, "catalog-item-title")
         title.setWordWrap(True)
 
-        description = QLabel()
-        description.setText("Название категории Кол-во цветов")
-        add_class(description, "catalog-item-description")
-        description.setWordWrap(True)
+        category = QLabel()
+        category.setText("Название категории")
+        add_class(category, "catalog-item-text") 
+        
+        colors = QLabel()
+        colors.setText("1 цвет")
+        add_class(colors, "catalog-item-text") 
 
         price = QLabel()
         price.setText("2 000 ₽")
         add_class(price, "catalog-item-price")
 
         layout.addWidget(image_container)
+        layout.addSpacing(15)
         layout.addWidget(title)
-        layout.addWidget(description)
+        layout.addSpacing(2)
+        layout.addWidget(category)
+        layout.addWidget(colors)
+        layout.addSpacing(9)
         layout.addWidget(price)
 
         self.setLayout(layout)
@@ -56,4 +64,7 @@ class CatalogItemWidget(ClickableWidget):
         self.clicked.connect(self._open_item_page)
 
     def _open_item_page(self):
-        pass
+        from ..windows import ItemWindow
+        window = ItemWindow()
+
+        window.show()

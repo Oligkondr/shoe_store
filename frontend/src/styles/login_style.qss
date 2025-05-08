@@ -6,6 +6,7 @@ QWidget {
     margin: 0;
     background: none;
     background-color: #ffffff;
+    color: #000000;
     border: none;
     border-radius: 0;
 }
@@ -20,6 +21,11 @@ QWidget {
     background-color: #000000;
     color: #ffffff;
 }
+.main-btn:disabled {
+    background-color: #ffffff;
+    color: #7f7f7f;
+    border-color: #dcdcdc;
+}
 
 .main-btn_solid {
     background-color: #000000;
@@ -29,12 +35,6 @@ QWidget {
     background-color: #ffffff;
     color: #000000;
 }
-.main-btn_solid:disabled {
-    background-color: #ffffff;
-    color: #7f7f7f;
-    border-color: #dcdcdc;
-}
-
 
 .small-btn {
     font-size: 12px;
@@ -47,7 +47,6 @@ QWidget {
     color: #7f7f7f;
     border-color: #7f7f7f;
 }
-
 
 .title-text {
     font-size: 28px;
@@ -63,7 +62,6 @@ QWidget {
 .underline {
     text-decoration: underline;
 }
-
 
 .text-input {
     border-bottom: 1px solid #000000;
