@@ -125,7 +125,6 @@ class LoginFormLayout(QVBoxLayout):
         self._login_btn.setText("Войти")
         add_class(self._login_btn, "main-btn", "main-btn_solid")
         self._login_btn.setFixedHeight(40)
-        self._login_btn.setContentsMargins(8, -1, 8, 0)
         self._login_btn.setCursor(Qt.PointingHandCursor)
         self._login_btn.setDisabled(True)
 
@@ -194,14 +193,14 @@ class LoginFormLayout(QVBoxLayout):
         }
         data_json = json.dumps(data)
 
-        thread = session.new_thread(
-            RequestThread(method="POST", url=url, data=data_json)
-        )
+        thread = RequestThread(method="POST", url=url, data=data_json)
+        session.threads.append(thread)
         thread.finished.connect(self._handle_login_response)
         thread.start()
 
     def _handle_login_response(self, response, thread):
-        session.delete_thread(thread)
+        if thread in session.threads:
+            session.threads.remove(thread)
 
         if isinstance(response, Exception):
             show_error_window()

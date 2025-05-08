@@ -7,12 +7,14 @@ QWidget {
     background: none;
     background-color: #ffffff;
     border: none;
+    border-radius: 0;
 }
 
 .main-btn {
     background-color: #ffffff;
     font-weight: 800;
     border: 1px solid #000000;
+    padding-bottom: 1px;
 }
 .main-btn:hover {
     background-color: #000000;

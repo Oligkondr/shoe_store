@@ -11,14 +11,9 @@ class _Session(object):
         self.curr_window = None
 
         # Хранение асинхронных запросов
-        self._threads = []
-    
-    def new_thread(self, thread):
-        self._threads.append(thread)
-        return thread
-
-    def delete_thread(self, thread):
-        self._threads.remove(thread)
-
+        self.threads = []
+        
+        # Хранение окон, которые необходимо закрыть при закрытии главного
+        self.windows = []
 
 session = _Session()
