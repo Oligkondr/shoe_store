@@ -5,3 +5,5 @@ img_1.png
 temp.py
 __pycache__/
 *.py[cod]
+
+/.docker/data/
