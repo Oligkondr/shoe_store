@@ -1,14 +1,14 @@
-from typing import Generic, TypeVar, Any
+from typing import Generic, TypeVar, List
 from datetime import datetime
 from pydantic import BaseModel
 
-from app.models import Product, Order, BaseColor
-
 T = TypeVar('T')
+
 
 class TestResponse(BaseModel):
     fild_a: int
     fild_b: str
+
 
 class ResponseModel(BaseModel, Generic[T]):
     success: bool
@@ -24,7 +24,7 @@ class UserLoginResponse(BaseModel):
     token: str
 
 
-class ClientRegisterResponse(BaseModel):
+class ClientResponse(BaseModel):
     email: str
     phone: str
     name: str
@@ -52,10 +52,18 @@ class ClientPayResponse(BaseModel):
     success: bool
 
 
-class OrderResponse(BaseModel):
+class ApprovedOrderResponse(BaseModel):
     id: int
     client_id: int
-    approved_at: datetime
+    approved_at: datetime | None
+    status_id: int
+    price: int
+
+
+class ActiveOrderResponse(BaseModel):
+    id: int
+    client_id: int
+    approved_at: None
     status_id: int
     price: int
 
@@ -75,7 +83,7 @@ class ColorResponse(BaseModel):
     id: int
     name: str
 
-    base_colors: dict
+    base_colors: list[BaseColorResponse]
 
 
 class ModelResponse(BaseModel):
@@ -83,7 +91,6 @@ class ModelResponse(BaseModel):
     name: str
     description: str
     sex_id: int
-    category_id: int
 
     category: CategoryResponse
 
@@ -91,11 +98,22 @@ class ModelResponse(BaseModel):
 class ModelColorResponse(BaseModel):
     id: int
     name: str
-    model_id: int
-    color_id: str
 
     model: ModelResponse
     color: ColorResponse
+
+
+class SizeResponse(BaseModel):
+    id: int
+    ru: str
+    cm: str
+
+
+class SizeGridResponse(BaseModel):
+    id: int
+    quantity: int
+
+    size: SizeResponse
 
 
 class ProductResponse(BaseModel):
@@ -103,7 +121,7 @@ class ProductResponse(BaseModel):
     price: int
     model_color_id: int
 
-    size_grid: dict
+    size_grid: list[SizeGridResponse]
     model_color: ModelColorResponse
 
 
@@ -112,5 +130,13 @@ class OrderProductResponse(BaseModel):
     price: int
     quantity: int
 
-    order: OrderResponse
+    order: ActiveOrderResponse
     product: ProductResponse
+
+
+class ProductsResponse(BaseModel):
+    products: list[ProductResponse]
+
+
+class OrdersResponse(BaseModel):
+    orders: list[ApprovedOrderResponse]

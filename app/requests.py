@@ -40,5 +40,5 @@ class ClientDepositRequest(BaseModel):
     amount: int
 
 
-class ClientQuantityRequest(BaseModel):
-    quantity: int
+class NewQuantityRequest(BaseModel):
+    new_quantity: int
