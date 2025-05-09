@@ -71,7 +71,7 @@ class CatalogLayout(QVBoxLayout):
 
         self.addWidget(self._scroll_area)
         
-        # self._get_items()
+        self._get_items()
 
         QTimer.singleShot(0, self._init_items_ui)
             
@@ -83,14 +83,14 @@ class CatalogLayout(QVBoxLayout):
             "token": session.token,
         }
         
-        thread = session.new_thread(
-            RequestThread(method="GET", url=url, headers=headers)
-        )
+        thread = RequestThread(method="GET", url=url, headers=headers)
+        session.threads.append(thread)
         thread.finished.connect(self._handle_get_items_response)
         thread.start()
 
     def _handle_get_items_response(self, response, thread):
-        session.delete_thread(thread)
+        if thread in session.threads: 
+            session.threads.remove(thread)
 
         if isinstance(response, Exception):
             show_error_window()

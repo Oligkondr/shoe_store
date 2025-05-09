@@ -140,10 +140,10 @@ class RegistrationFormLayout(QVBoxLayout):
         password2_layout.addWidget(self._inputs[self._InputName.PASSWORD2])
         password2_layout.addWidget(self._toggle_btns[self._InputName.PASSWORD2])
 
-        add_class(self._register_error, "error-text", "error-text_above")
         self._register_error.setContentsMargins(0, 0, 0, 7)
         self._register_error.setWordWrap(True)
         self._register_error.setAlignment(Qt.AlignHCenter)
+        add_class(self._register_error, "error-text")
         self._register_error.hide()
 
         self._register_btn.setText("Зарегистрироваться")
@@ -170,7 +170,7 @@ class RegistrationFormLayout(QVBoxLayout):
         self.addLayout(password2_layout)
         self.addWidget(self._errors[self._InputName.PASSWORD2])
         self.addSpacing(30)
-        self.addWidget(self._register_error, alignment=Qt.AlignHCenter)
+        self.addWidget(self._register_error)
         self.addWidget(self._register_btn)
 
     def _connect_signals(self):
@@ -270,7 +270,7 @@ class RegistrationFormLayout(QVBoxLayout):
 
         url = "http://127.0.0.1:8000/api/v1/register"
         data = {
-            "email": self._inputs[self._InputName.EMAIL].text().strip(),
+            "email": self._inputs[self._InputName.EMAIL].text().strip().lower(),
             "password": self._inputs[self._InputName.PASSWORD].text(),
             "phone": self._inputs[self._InputName.PHONE].text()[1:],
             "name": self._inputs[self._InputName.NAME].text().strip(),
@@ -290,13 +290,15 @@ class RegistrationFormLayout(QVBoxLayout):
         if isinstance(response, Exception):
             show_error_window()
         else:
-            data = json.loads(response.text)
-            if response.status_code == 200:
-                session.login_email = data["email"]
-                session.registration_name = data["name"]
-                self._parent_window.show_success_registration_message()
-            elif response.status_code == 401:
-                self._show_register_error(data["detail"])
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    data = response_dict["data"]
+                    session.login_email = data["email"]
+                    session.registration_name = data["name"]
+                    self._parent_window.show_success_registration_message()
+                else:
+                    self._show_register_error(response_dict["error"])
             else:
                 show_error_window()
 
