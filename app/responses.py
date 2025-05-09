@@ -140,3 +140,6 @@ class ProductsResponse(BaseModel):
 
 class OrdersResponse(BaseModel):
     orders: list[ApprovedOrderResponse]
+
+class ModelsResponse(BaseModel):
+    models: list[ModelResponse]

@@ -1,8 +1,9 @@
 from datetime import datetime
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body, Request, Query
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from starlette import status
 
 from app.auth.auth_handler import verify_password, create_access_token, get_current_client
@@ -11,14 +12,19 @@ from app.database import session_maker
 from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest, \
     ClientUpdateRequest, NewQuantityRequest
 from app.responses import UserLoginResponse, ClientResponse, ResponseModel, OrderProductResponse, TestResponse, \
-    ApprovedOrderResponse, ProductResponse, ProductsResponse, OrdersResponse, ActiveOrderResponse
+    ApprovedOrderResponse, ProductResponse, ProductsResponse, OrdersResponse, ActiveOrderResponse, ModelsResponse, \
+    ModelResponse
 
 clients_router = APIRouter(prefix="/api/v1", tags=["Client"])
 
 
-# @clients_router.get('/test', summary='Test get request', response_model=ResponseModel[TestResponse])
-# def test():
-#     return ResponseModel[TestResponse](success=True, data=TestResponse(fild_a=1, fild_b='str'))
+@clients_router.get('/test', summary='Test get request')
+def test(request: Request):
+    params = request.query_params
+    params_dict = dict(params)
+    model = params_dict['model']
+    return model
+
 
 @clients_router.get('/orders', summary='Get client approved orders',
                     response_model=ResponseModel[ApprovedOrderResponse])
@@ -81,15 +87,21 @@ def get_client_profile(client: Client = Depends(get_current_client)):
 
 
 @clients_router.get('/products', summary='Get all products', response_model=ResponseModel[ProductsResponse])
-def get_all_products():
+def get_all_products(
+        model_id: Optional[int] = Query(None),
+        client: Client = Depends(get_current_client)
+):
     with session_maker() as session:
         smtm = select(Product).options(
-            joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
-            joinedload(Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Product.size_grid).subqueryload(SizeGrid.size),
+            selectinload(Product.model_color).selectinload(ModelColor.color).selectinload(Color.base_colors),
+            selectinload(Product.model_color).selectinload(ModelColor.model).selectinload(Model.category),
+            selectinload(Product.size_grid).selectinload(SizeGrid.size),
         )
 
-        result = session.execute(smtm).unique().scalars().all()
+        if model_id:
+            smtm = smtm.join(Product.model_color).filter(ModelColor.model_id == model_id)
+
+        result = session.execute(smtm).scalars().all()
 
         result_dto = [ProductResponse.model_validate(row, from_attributes=True) for row in result]
 
@@ -281,4 +293,17 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
     return ResponseModel[ClientResponse](
         success=True,
         data=result_dto
+    )
+
+
+@clients_router.get('/models', summary='Get all models', response_model=ResponseModel[ModelsResponse])
+def get_models(client: Client = Depends(get_current_client)):
+    with session_maker() as session:
+        models_obj = session.query(Model).all()
+
+        result_dto = [ModelResponse.model_validate(row, from_attributes=True) for row in models_obj]
+
+    return ResponseModel[ModelsResponse](
+        success=True,
+        data=ModelsResponse(models=result_dto)
     )
