@@ -26,11 +26,11 @@ def validate_registration_email(str):
         return ValidationResult(True)
         
             
-
-
 def validate_registration_name(str):
     if len(str.strip()) == 0:
         return ValidationResult(False, "Заполните поле")
+    elif len(str.strip()) > 30:
+        return ValidationResult(False, "Имя не должно содержать больше 30 символов")
     else:
         return ValidationResult(True)
 
@@ -38,6 +38,8 @@ def validate_registration_name(str):
 def validate_registration_surname(str):
     if len(str.strip()) == 0:
         return ValidationResult(False, "Заполните поле")
+    elif len(str.strip()) > 30:
+        return ValidationResult(False, "Фамилия не должна содержать больше 30 символов")
     else:
         return ValidationResult(True)
 
