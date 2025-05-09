@@ -19,8 +19,6 @@ class PasswordEncryption:
 
 
 class Admin(Base, PasswordEncryption):
-    # __json_exclude__ = set(['password'])
-
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     phone: Mapped[str] = mapped_column(String[10], unique=True)
@@ -28,16 +26,6 @@ class Admin(Base, PasswordEncryption):
     surname: Mapped[str]
     patronymic: Mapped[str] = mapped_column(nullable=True)
     is_super: Mapped[bool] = mapped_column(default=False)
-
-    def to_dict(self):
-        return {
-            'email': self.email,
-            'phone': self.phone,
-            'name': self.name,
-            'surname': self.surname,
-            'patronymic': self.patronymic,
-            'is_super': self.is_super,
-        }
 
 
 class Client(Base, PasswordEncryption):
@@ -50,22 +38,12 @@ class Client(Base, PasswordEncryption):
 
     orders = relationship("Order", back_populates='client')
 
-    def to_dict(self):
-        return {
-            'email': self.email,
-            'phone': self.phone,
-            'name': self.name,
-            'surname': self.surname,
-            'account': self.account,
-        }
-
     def get_or_create_current_order(self):
         with session_maker() as session:
             order_obj = first_or_create(session, Order, None, client_id=self.id, status_id=Order.STATUS_NEW_ID)
         return order_obj
 
     def get_current_order(self, session):
-        # with session_maker() as session:
         order_obj = session.query(Order).filter_by(
             client_id=self.id,
             status_id=Order.STATUS_NEW_ID

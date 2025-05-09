@@ -116,11 +116,11 @@ def create_admin(client: ClientCreateRequest):
     with session_maker() as session:
         if session.query(Client).filter_by(email=client.email).first() is not None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="User with this email has already been registered")
+                                detail="Пользователь с такой почтой уже зарегистрирован")
 
         if session.query(Client).filter_by(phone=client.phone).first() is not None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                                detail="User with this number has already been registered")
+                                detail="Пользователь с таким номером уже зарегистрирован")
 
         new_client = Client(
             email=client.email,
@@ -148,7 +148,7 @@ def login_client(client: UserAuthRequest):
     if client_db is None or verify_password(plain_password=client.password,
                                             hashed_password=client_db.password) is False:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail='Incorrect email or password')
+                            detail='Неверная почта или пароль')
 
     access_token = create_access_token({
         'id': client_db.id,
@@ -200,7 +200,7 @@ def remove_product(id: int, client: Client = Depends(get_current_client)):
         order_product = session.get(OrderProduct, id)
 
         if order_product is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Order product not found')
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Такого продукта нет к корзине')
 
         if order_obj.id == order_product.order_id:
             session.delete(order_product)
@@ -218,11 +218,10 @@ def change_product_quantity(id: int, data: NewQuantityRequest, client: Client = 
         order_product = session.get(OrderProduct, id)
 
         if order_product is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Order product not found')
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Такого продукта нет к корзине')
 
         if order_obj.id == order_product.order_id:
             order_product.quantity = data.quantity
-
             session.commit()
 
             order_obj.update_price()
@@ -263,7 +262,7 @@ def approve(client: Client = Depends(get_current_client)):
 
             session.commit()
         else:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order is empty")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Корзина пуста")
 
         result_dto = ApprovedOrderResponse.model_validate(order, from_attributes=True)
 
@@ -279,7 +278,7 @@ def save_profile_changes(changes: ClientUpdateRequest, client: Client = Depends(
         client_obj = session.get(Client, client.id)
 
         if not client_obj:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден")
 
         client_obj.email = changes.email
         client_obj.phone = changes.phone
