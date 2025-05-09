@@ -38,3 +38,7 @@ class ClientProductRequest(BaseModel):
 
 class ClientDepositRequest(BaseModel):
     amount: int
+
+
+class NewQuantityRequest(BaseModel):
+    new_quantity: int

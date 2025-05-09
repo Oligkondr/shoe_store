@@ -11,5 +11,5 @@ services:
     ports:
       - '${DB_PORT}:5432'
     volumes:
-      - .docker/data:/var/lib/postgresql/data
+      - .docker/db.dump:/var/lib/postgresql/db.dump
     restart: unless-stopped
