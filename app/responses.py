@@ -55,7 +55,7 @@ class ClientPayResponse(BaseModel):
 class ApprovedOrderResponse(BaseModel):
     id: int
     client_id: int
-    approved_at: datetime | None
+    approved_at: datetime
     status_id: int
     price: int
 
@@ -140,6 +140,7 @@ class ProductsResponse(BaseModel):
 
 class OrdersResponse(BaseModel):
     orders: list[ApprovedOrderResponse]
+
 
 class ModelsResponse(BaseModel):
     models: list[ModelResponse]
