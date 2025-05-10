@@ -10,7 +10,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 
 from ..widgets import OverlayWidget, ShoeSizeBtnWidget, ModelVariationBtnWidget, OverlayMessageWidget
-from ..utils import get_absolute_path, show_error_window, add_class, clear_layout
+from ..utils import get_absolute_path, show_error_window, add_class, clear_layout, normalize_item_page_data
+from ..classes import RequestThread
+import json
 from session import session
 
 example = {
@@ -156,9 +158,39 @@ class ItemWindow(QWidget):
         self._overlay.setParent(self)
         self._overlay.resize()
 
-    def _get_model_data(self):
-        self._data = example
-        self._init_model_ui()
+    def _get_model_data(self):    
+        self._overlay.show()
+
+        url = f"http://127.0.0.1:8000/api/v1/products?model_id={self._model_id}"
+        headers = {
+            "token": session.token,
+        }
+        
+        thread = RequestThread(method="GET", url=url, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_get_model_data_response)
+        thread.start()
+
+    def _handle_get_model_data_response(self, response, thread):
+        if thread in session.threads: 
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._overlay.hide()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    products = response_dict["data"]["products"]
+                    self._data = normalize_item_page_data(products)
+                    self._init_model_ui()
+                else:
+                    show_error_window()
+            else:
+                show_error_window()
+
+        self._overlay.hide()
 
     def _init_model_ui(self):
         self._category_label.setText(self._data["category"])

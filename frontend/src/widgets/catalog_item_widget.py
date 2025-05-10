@@ -65,6 +65,6 @@ class CatalogItemWidget(ClickableWidget):
 
     def _open_item_page(self):
         from ..windows import ItemWindow
-        window = ItemWindow()
+        window = ItemWindow(self._item_data["id"])
 
         window.show()
