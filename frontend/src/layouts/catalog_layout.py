@@ -28,6 +28,7 @@ from ..utils import (
     validate_login_password,
     clear_layout,
     show_error_window,
+    normalize_catalog_products,
 )
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget
 from ..classes import RequestThread
@@ -39,6 +40,7 @@ class CatalogLayout(QVBoxLayout):
         
         self._parent_window = parent_window
         
+        self._data = None
         self._items = list()
 
         self._curr_columns = 0
@@ -72,8 +74,6 @@ class CatalogLayout(QVBoxLayout):
         self.addWidget(self._scroll_area)
         
         self._get_items()
-
-        QTimer.singleShot(0, self._init_items_ui)
             
     def _get_items(self):
         self._parent_window.show_overlay()
@@ -96,27 +96,34 @@ class CatalogLayout(QVBoxLayout):
             show_error_window()
             self._parent_window.hide_overlay()
         else:
-            print(response.text)
-            data = json.loads(response.text)
-            if response.status_code == 200:
-                pass
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    products = response_dict["data"]["products"]
+                    self._data = normalize_catalog_products(products)
+                    self._init_items_ui()
+
+                else:
+                    show_error_window()
+                    self._parent_window.hide_overlay()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
+
         self._parent_window.hide_overlay()
 
     def _init_items_ui(self):
-        items_count = 100
         columns =  (self._scroll_area.viewport().width() - 40) // 210
         if columns != self._curr_columns:
             self._curr_columns = columns
             if self._items_layout is not None:
                 clear_layout(self._items_layout)
-                for i in range(items_count):
-                    widget = CatalogItemWidget({})
-                    row = i // self._curr_columns
-                    column = i % self._curr_columns
-                    self._items_layout.addWidget(widget, row, column)
+                if self._data is not None:
+                    for i, model_data in enumerate(self._data.values()):
+                        widget = CatalogItemWidget(model_data)
+                        row = i // self._curr_columns
+                        column = i % self._curr_columns
+                        self._items_layout.addWidget(widget, row, column)
             
 
     def resize_catalog(self):
