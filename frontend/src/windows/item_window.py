@@ -116,6 +116,7 @@ class ItemWindow(QWidget):
         self._add_btn.setCursor(Qt.PointingHandCursor)
         self._add_btn.setDisabled(True)
         self._add_btn.clicked.connect(self._add_btn_handler)
+        self._add_btn.hide()
 
         ui_layout = QVBoxLayout()
         ui_layout.setContentsMargins(30, 26, 30, 30)
@@ -218,6 +219,7 @@ class ItemWindow(QWidget):
         self._curr_variation = self._variation_btns[0].variation_id
 
         self._update_variation_ui()
+        self._add_btn.show()
 
     def _update_variation_ui(self):
         clear_layout(self._colors_layout)
