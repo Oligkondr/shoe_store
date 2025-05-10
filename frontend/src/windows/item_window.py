@@ -232,7 +232,7 @@ class ItemWindow(QWidget):
 
         colors_label = QLabel()
         add_class(colors_label, "bold-text")
-        colors_label.setContentsMargins(3, 0, 0, 2)
+        colors_label.setContentsMargins(3, 0, 0, 0)
         colors_label.setText(self._data["variations"][self._curr_variation]["name"])
         self._colors_layout.addWidget(colors_label)
 

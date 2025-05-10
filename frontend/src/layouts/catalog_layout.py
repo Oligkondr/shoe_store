@@ -37,16 +37,16 @@ from ..classes import RequestThread
 class CatalogLayout(QVBoxLayout):
     def __init__(self, parent_window):
         super().__init__()
-        
+
         self._parent_window = parent_window
-        
+
         self._data = None
         self._items = list()
 
         self._curr_columns = 0
         self._items_layout = QGridLayout()
         self._scroll_area = QScrollArea()
-        
+
         self._init_ui()
 
     def _init_ui(self):
@@ -61,20 +61,20 @@ class CatalogLayout(QVBoxLayout):
 
         items_container = QWidget()
         items_container.setLayout(self._items_layout)
-        
+
         centering_layout = QHBoxLayout()
-        centering_layout.setContentsMargins(30, 30, 30, 30)
+        centering_layout.setContentsMargins(30, 23, 30, 30)
         centering_layout.addWidget(items_container, alignment=Qt.AlignHCenter)
-        
+
         centering_layout_container = QWidget()
         centering_layout_container.setLayout(centering_layout)
 
         self._scroll_area.setWidget(centering_layout_container)
 
         self.addWidget(self._scroll_area)
-        
+
         self._get_items()
-            
+
     def _get_items(self):
         self._parent_window.show_overlay()
 
@@ -82,14 +82,14 @@ class CatalogLayout(QVBoxLayout):
         headers = {
             "token": session.token,
         }
-        
+
         thread = RequestThread(method="GET", url=url, headers=headers)
         session.threads.append(thread)
         thread.finished.connect(self._handle_get_items_response)
         thread.start()
 
     def _handle_get_items_response(self, response, thread):
-        if thread in session.threads: 
+        if thread in session.threads:
             session.threads.remove(thread)
 
         if isinstance(response, Exception):
@@ -113,19 +113,29 @@ class CatalogLayout(QVBoxLayout):
         self._parent_window.hide_overlay()
 
     def _init_items_ui(self):
-        columns =  (self._scroll_area.viewport().width() - 40) // 210
+        columns = (self._scroll_area.viewport().width() - 40) // 210
         if columns != self._curr_columns:
             self._curr_columns = columns
             if self._items_layout is not None:
                 clear_layout(self._items_layout)
+                        
+                title = QLabel()
+                title.setText("КАТАЛОГ")
+                add_class(title, "title-text")
+                title.setFixedHeight(34)
+                
+                self._items_layout.addWidget(title, 0, 0)
                 if self._data is not None:
                     for i, model_data in enumerate(self._data.values()):
                         widget = CatalogItemWidget(model_data)
-                        row = i // self._curr_columns
+                        row = i // self._curr_columns + 1
                         column = i % self._curr_columns
                         self._items_layout.addWidget(widget, row, column)
-            
+                    if len(self._data) < self._curr_columns:
+                        self._items_layout.setColumnStretch(len(self._data), 1)
+                    self._items_layout.setRowStretch(
+                        ((len(self._data) - 1) // self._curr_columns) + 2, 1
+                    )
 
     def resize_catalog(self):
         self._init_items_ui()
-        
