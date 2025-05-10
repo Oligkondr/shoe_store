@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget,
+    QApplication,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -21,6 +22,7 @@ from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 from ..utils import get_absolute_path, clear_layout, add_class
 from ..layouts import CatalogLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
+from session import session
 
 
 class MainWindow(QWidget):
@@ -148,3 +150,7 @@ class MainWindow(QWidget):
         if isinstance(self._main_container.layout(), CatalogLayout):
             self._main_container.layout().resize_catalog()
         super().resizeEvent(event)
+    
+    def closeEvent(self, event):
+        session.windows.clear()
+        super().closeEvent(event)

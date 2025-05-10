@@ -112,7 +112,6 @@ QScrollBar::sub-line:horizontal {
     color: #000000;
 }
 
-
 .small-btn {
     font-size: 12px;
     border-bottom: 1px solid #000000;
@@ -124,7 +123,6 @@ QScrollBar::sub-line:horizontal {
     color: #7f7f7f;
     border-color: #7f7f7f;
 }
-
 
 .title-text {
     font-size: 28px;
@@ -144,6 +142,9 @@ QScrollBar::sub-line:horizontal {
     text-decoration: underline;
 }
 
+.color-circle {
+    border: 1px solid #dcdcdc;
+}
 
 .text-input {
     border-bottom: 1px solid #000000;
@@ -157,4 +158,8 @@ QScrollBar::sub-line:horizontal {
 
 #login-image {
     background-color: black
+}
+
+.transparent-background {
+    background-color: rgba(0, 0, 0, 50)
 }
