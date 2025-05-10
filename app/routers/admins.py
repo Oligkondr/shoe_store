@@ -6,7 +6,7 @@ from app.auth.auth_handler import create_access_token, verify_password
 from app.database import session_maker
 from app.requests import AdminCreateRequest, UserAuthRequest
 
-from app.models import Admin, Product, ModelColor, Color, Model, SizeGrid
+from app.models import Admin, Product, ModelColor, Color, Model, ProductSize
 from app.responses import UserRegisterResponse, UserLoginResponse
 
 admins_router = APIRouter(prefix="/api/v1/admin", tags=["Admin"])
@@ -130,7 +130,7 @@ def get_all_products():
         smtm = select(Product).options(
             joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
             joinedload(Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Product.size_grid).subqueryload(SizeGrid.size),
+            joinedload(Product.size_grid).subqueryload(ProductSize.size),
         )
         result = session.execute(smtm).unique().scalars().all()
     return result

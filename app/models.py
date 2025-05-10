@@ -117,13 +117,13 @@ class Order(Base):
 
 
 class OrderProduct(Base):
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
+    product_id: Mapped[int] = mapped_column(ForeignKey('product_sizes.id'))
     order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
     quantity: Mapped[int] = mapped_column(SmallInteger)
     price: Mapped[int] = mapped_column(server_default=text("0"))
 
     order = relationship("Order", back_populates="order_products")
-    product = relationship("Product", back_populates="order_products")
+    product_size = relationship("ProductSize", back_populates="order_products")
 
 
 class Product(Base):
@@ -131,25 +131,27 @@ class Product(Base):
     price: Mapped[int] = mapped_column(server_default=text("0"))
 
     model_color = relationship("ModelColor", back_populates="products")
-    size_grid = relationship("SizeGrid", back_populates="product")
+    product_size = relationship("ProductSize", back_populates="product")
 
-    order_products = relationship("OrderProduct", back_populates="product")
+    # order_products = relationship("OrderProduct", back_populates="product")
 
 
 class Size(Base):
     ru: Mapped[str] = mapped_column(String[6])
     cm: Mapped[str] = mapped_column(String[6])
 
-    size_grid = relationship("SizeGrid", back_populates="size")
+    product_size = relationship("ProductSize", back_populates="size")
 
 
-class SizeGrid(Base):
+class ProductSize(Base):
     size_id: Mapped[int] = mapped_column(ForeignKey('sizes.id'))
     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
     quantity: Mapped[int] = mapped_column(SmallInteger)
 
-    product = relationship('Product', back_populates='size_grid')
-    size = relationship('Size', back_populates='size_grid')
+    product = relationship('Product', back_populates='product_size')
+    size = relationship('Size', back_populates='product_size')
+
+    order_products = relationship("OrderProduct", back_populates="product_size")
 
 
 class ModelColor(Base):

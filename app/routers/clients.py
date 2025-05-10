@@ -1,17 +1,16 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Body, Request, Query
-from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from sqlalchemy import select, Nullable
 from starlette import status
 
 from app.auth.auth_handler import verify_password, create_access_token, get_current_client
-from app.models import Client, Order, Product, OrderProduct, ModelColor, SizeGrid, Color, Model
+from app.models import Client, Order, Product, OrderProduct, ModelColor, ProductSize, Model
 from app.database import session_maker
 from app.requests import ClientCreateRequest, UserAuthRequest, ClientProductRequest, ClientDepositRequest, \
     ClientUpdateRequest, NewQuantityRequest
-from app.responses import UserLoginResponse, ClientResponse, ResponseModel, OrderProductResponse, TestResponse, \
+from app.responses import UserLoginResponse, ClientResponse, ResponseModel, OrderProductResponse, \
     ApprovedOrderResponse, ProductResponse, ProductsResponse, OrdersResponse, ActiveOrderResponse, ModelsResponse, \
     ModelResponse
 
@@ -26,18 +25,10 @@ def test(request: Request):
     return model
 
 
-@clients_router.get('/orders', summary='Get client approved orders',
-                    response_model=ResponseModel[ApprovedOrderResponse])
+@clients_router.get('/orders', summary='Get client approved orders', response_model=ResponseModel[OrdersResponse])
 def get_approved_orders(client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        orders_obj = session.query(Order).options(
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.size_grid).subqueryload(SizeGrid.size),
-        ).filter(
+        orders_obj = session.query(Order).filter(
             Order.client_id == client.id,
             Order.status_id != Order.STATUS_NEW_ID,
         ).all()
@@ -50,17 +41,10 @@ def get_approved_orders(client: Client = Depends(get_current_client)):
     )
 
 
-@clients_router.get('/order', summary='Get client active order', response_model=ResponseModel[ApprovedOrderResponse])
+@clients_router.get('/order', summary='Get client active order', response_model=ResponseModel[ActiveOrderResponse])
 def get_active_order(client: Client = Depends(get_current_client)):
     with session_maker() as session:
-        order_obj = session.query(Order).options(
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Order.order_products).subqueryload(OrderProduct.product).subqueryload(
-                Product.size_grid).subqueryload(SizeGrid.size),
-        ).filter_by(client_id=client.id, status_id=Order.STATUS_NEW_ID).one_or_none()
+        order_obj = session.query(Order).filter_by(client_id=client.id, status_id=Order.STATUS_NEW_ID).one_or_none()
 
         if order_obj is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Нет активной корзины")
@@ -92,11 +76,7 @@ def get_all_products(
         client: Client = Depends(get_current_client)
 ):
     with session_maker() as session:
-        smtm = select(Product).options(
-            selectinload(Product.model_color).selectinload(ModelColor.color).selectinload(Color.base_colors),
-            selectinload(Product.model_color).selectinload(ModelColor.model).selectinload(Model.category),
-            selectinload(Product.size_grid).selectinload(SizeGrid.size),
-        )
+        smtm = select(Product)
 
         if model_id:
             smtm = smtm.join(Product.model_color).filter(ModelColor.model_id == model_id)
@@ -158,29 +138,23 @@ def login_client(client: UserAuthRequest):
     return ResponseModel[UserLoginResponse](success=True, data=UserLoginResponse(token=access_token))
 
 
-@clients_router.post('/product', summary='Add product to order', response_model=ResponseModel[OrderProductResponse])
+@clients_router.post('/product', summary='Add product to order',
+                     response_model=ResponseModel[OrderProductResponse]
+                     )
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
         order_obj = client.get_or_create_current_order()
 
-        stmt = select(Product).where(Product.id == data.id).options(
-            joinedload(Product.model_color).subqueryload(ModelColor.color).subqueryload(Color.base_colors),
-            joinedload(Product.model_color).subqueryload(ModelColor.model).subqueryload(Model.category),
-            joinedload(Product.size_grid).subqueryload(SizeGrid.size),
-        )
-
-        result = session.execute(stmt).unique()
-        product_obj = result.scalar_one_or_none()
+        product_size_obj = session.get(ProductSize, data.id)
 
         new_order_product = OrderProduct(
-            product=product_obj,
+            product_size=product_size_obj,
             order=order_obj,
             quantity=data.quantity,
-            price=product_obj.price,
+            price=product_size_obj.product.price,
         )
 
         session.add(new_order_product)
-
         session.commit()
 
         order_obj.update_price()
@@ -205,6 +179,7 @@ def remove_product(id: int, client: Client = Depends(get_current_client)):
         if order_obj.id == order_product.order_id:
             session.delete(order_product)
             session.commit()
+            order_obj.update_price()
         else:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
