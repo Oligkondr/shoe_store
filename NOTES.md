@@ -29,5 +29,8 @@ docker exec -i shoe_store_db pg_restore -U user -d shoe_store_db -F c /var/lib/p
 
 ___
 
-alembic revision --autogenerate -m "Initial revision"\
+alembic revision --autogenerate -m "Initial revision"
+
 alembic upgrade head
+
+docker cp shoe_store_db:/var/lib/postgresql/dbp.dump .docker/dbp.dump

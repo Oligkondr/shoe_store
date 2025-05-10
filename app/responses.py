@@ -5,11 +5,6 @@ from pydantic import BaseModel
 T = TypeVar('T')
 
 
-class TestResponse(BaseModel):
-    fild_a: int
-    fild_b: str
-
-
 class ResponseModel(BaseModel, Generic[T]):
     success: bool
     data: T
@@ -109,19 +104,26 @@ class SizeResponse(BaseModel):
     cm: str
 
 
-class SizeGridResponse(BaseModel):
+class ProductForSizeResponse(BaseModel):
+    id: int
+    price: int
+
+    model_color: ModelColorResponse
+
+
+class ProductSizeResponse(BaseModel):
     id: int
     quantity: int
 
     size: SizeResponse
+    product: ProductForSizeResponse
 
 
 class ProductResponse(BaseModel):
     id: int
     price: int
-    model_color_id: int
 
-    size_grid: list[SizeGridResponse]
+    product_size: list[ProductSizeResponse]
     model_color: ModelColorResponse
 
 
@@ -131,7 +133,7 @@ class OrderProductResponse(BaseModel):
     quantity: int
 
     order: ActiveOrderResponse
-    product: ProductResponse
+    product_size: ProductSizeResponse
 
 
 class ProductsResponse(BaseModel):

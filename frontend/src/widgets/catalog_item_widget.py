@@ -33,20 +33,20 @@ class CatalogItemWidget(ClickableWidget):
         )
 
         title = QLabel()
-        title.setText("Название товара")
+        title.setText(self._item_data["name"])
         add_class(title, "catalog-item-title")
         title.setWordWrap(True)
 
         category = QLabel()
-        category.setText("Название категории")
+        category.setText(self._item_data["category"])
         add_class(category, "catalog-item-text") 
         
         colors = QLabel()
-        colors.setText("1 цвет")
+        colors.setText(self._item_data["colors_str"])
         add_class(colors, "catalog-item-text") 
 
         price = QLabel()
-        price.setText("2 000 ₽")
+        price.setText(self._item_data["price_str"])
         add_class(price, "catalog-item-price")
 
         layout.addWidget(image_container)
@@ -65,6 +65,6 @@ class CatalogItemWidget(ClickableWidget):
 
     def _open_item_page(self):
         from ..windows import ItemWindow
-        window = ItemWindow()
+        window = ItemWindow(self._item_data["id"])
 
         window.show()
