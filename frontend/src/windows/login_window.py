@@ -104,6 +104,10 @@ class LoginWindow(QWidget):
         self._close_button.clicked.connect(self.close)
 
     def _render_form_layout(self, new_layout):
+        """
+        Очищает подготовленное для формы место и рисует там новую
+        в зависимости от переданного аргумента.
+        """
         curr_layout = self._form_container.layout()
         if curr_layout is not None:
             clear_layout(curr_layout)

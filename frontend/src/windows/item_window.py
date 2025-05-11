@@ -99,7 +99,8 @@ class ItemWindow(QWidget):
         self._add_btn.setFixedHeight(40)
         self._add_btn.setCursor(Qt.PointingHandCursor)
         self._add_btn.setDisabled(True)
-        self._add_btn.clicked.connect(self._get_cart_data)
+        # Вешаем сигнал на кнопку добавления товара
+        self._add_btn.clicked.connect(self._start_product_adding)
         self._add_btn.hide()
 
         ui_layout = QVBoxLayout()
@@ -169,6 +170,7 @@ class ItemWindow(QWidget):
                 if response_dict["success"]:
                     products = response_dict["data"]["products"]
                     self._data = normalize_item_page_data(products)
+                    # Настраиваем элементы окна после успешного ответа от сервера
                     self._init_model_ui()
                 else:
                     show_error_window()
@@ -208,6 +210,9 @@ class ItemWindow(QWidget):
         self._add_btn.show()
 
     def _update_variation_ui(self):
+        """
+        Перерисовывает виджеты окна в зависимости от выбранной вариации товара.
+        """
         clear_layout(self._colors_layout)
         for color in self._data["variations"][self._curr_variation]["colors"]:
             widget = QWidget()
@@ -232,7 +237,7 @@ class ItemWindow(QWidget):
         self._size_btns.clear()
         for size in self._data["variations"][self._curr_variation]["sizes"]:
             widget = ShoeSizeBtnWidget()
-            widget.item_id = size["product_id"]
+            widget.product_size_id = size["product_id"]
             widget.setText(size["value"])
             widget.clicked.connect(self._size_btn_handler)
             self._size_btns.append(widget)
@@ -273,6 +278,9 @@ class ItemWindow(QWidget):
         else:
             self._curr_size.setChecked(False)
             self._curr_size = sender
+            
+    def _start_product_adding(self):
+        self._get_cart_data()
 
     def _get_cart_data(self):
         self._overlay.show()
@@ -298,17 +306,21 @@ class ItemWindow(QWidget):
             response_dict = json.loads(response.text)
             if "success" in response_dict:
                 if response_dict["success"]:
-                    added_products = normalize_cart_data(response_dict["data"])["products"]
+                    added_products = normalize_cart_data(response_dict["data"])[
+                        "products"
+                    ]
                     not_in_cart = True
                     for product_data in added_products:
-                        if product_data["product_size_id"] == self._curr_size.item_id:
+                        if product_data["product_size_id"] == self._curr_size.product_size_id:
                             not_in_cart = False
                     if not_in_cart:
-                        self._add_product()  
+                        self._add_product()
                     else:
                         self._overlay.hide()
                         self._overlay_message.message.setFixedHeight(70)
-                        self._overlay_message.message.setText("Вы уже добавили этот товар. Перейдите в корзину, чтобы изменить его количество.")
+                        self._overlay_message.message.setText(
+                            "Вы уже добавили этот товар. Перейдите в корзину, чтобы изменить его количество."
+                        )
                         self._overlay_message.show()
                 else:
                     self._add_product()
@@ -316,14 +328,13 @@ class ItemWindow(QWidget):
                 show_error_window()
                 self._overlay.hide()
 
-
     def _add_product(self):
         url = "http://127.0.0.1:8000/api/v1/product"
         headers = {
             "token": session.token,
         }
         data = {
-            "id": self._curr_size.item_id,
+            "id": self._curr_size.product_size_id,
             "quantity": 1,
         }
         data_json = json.dumps(data)
@@ -345,9 +356,11 @@ class ItemWindow(QWidget):
             if "success" in response_dict:
                 self._overlay.hide()
                 self._overlay_message.message.setFixedHeight(50)
-                self._overlay_message.message.setText("Товар успешно добавлен в корзину!")
+                self._overlay_message.message.setText(
+                    "Товар успешно добавлен в корзину!"
+                )
                 self._overlay_message.show()
-                session.curr_window.update_cart_number()
+                session.curr_window.update_cart()
             else:
                 show_error_window()
 

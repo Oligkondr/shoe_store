@@ -9,7 +9,7 @@ class ShoeSizeBtnWidget(QPushButton):
         super().__init__(parent)
 
         # Для внешних операций
-        self.item_id = None
+        self.product_size_id = None
 
         self.setCheckable(True)
         self.setFixedSize(60, 32)

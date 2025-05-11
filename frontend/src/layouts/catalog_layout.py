@@ -140,4 +140,8 @@ class CatalogLayout(QVBoxLayout):
                     title.setText("КАТАЛОГ")
 
     def resize_catalog(self):
+        """
+        Глобальная функция для изменения позиционирования элементов
+        в каталоге при изменении размеров окна.
+        """
         self._init_items_ui()

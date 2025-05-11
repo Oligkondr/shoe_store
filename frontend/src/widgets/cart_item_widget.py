@@ -183,7 +183,7 @@ class CartItemWidget(QWidget):
             "token": session.token,
         }
         data = {
-            "new_quantity": self._item_amount,
+            "quantity": self._item_amount,
         }
         data_json = json.dumps(data)
 
@@ -202,7 +202,6 @@ class CartItemWidget(QWidget):
         else:
             print(response.text)
             response_dict = json.loads(response.text)
-            print(response_dict)
             if "success" in response_dict:
                 if response_dict["success"]:
                     pass

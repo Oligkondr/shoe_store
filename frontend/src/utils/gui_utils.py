@@ -47,6 +47,9 @@ def replace_widget_in_layout(layout: QLayout, old_widget: QWidget, new_widget: Q
     layout.insertWidget(index, new_widget)
 
 def show_error_window():
+    """
+    Показывает универсальное всплывающее окно ошибки.
+    """
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
     msg.setText("Упс, что-то пошло не так...\nПожалуйста, повторите операцию. \n\nВ случае повторной ошибки\nперезагрузите приложение.")

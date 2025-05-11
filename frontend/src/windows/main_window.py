@@ -19,7 +19,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
-from ..utils import get_absolute_path, clear_layout, add_class, show_error_window, normalize_cart_data
+from ..utils import (
+    get_absolute_path,
+    clear_layout,
+    add_class,
+    show_error_window,
+    normalize_cart_data,
+)
 from ..layouts import CatalogLayout, CartLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
 from session import session
@@ -48,9 +54,7 @@ class MainWindow(QWidget):
 
         self._init_ui()
         self._connect_signals()
-        self.show_catalog()
-        self.update_cart_number()
-    
+
     def _init_ui(self):
         # Подключение файла стилей
         style_file_path = get_absolute_path(__file__, "../styles/main_style.qss")
@@ -135,7 +139,6 @@ class MainWindow(QWidget):
 
         self.setLayout(window_layout)
         self.setMinimumSize(800, 500)
-        
 
         self._overlay.setParent(self)
 
@@ -143,64 +146,44 @@ class MainWindow(QWidget):
         self._account_container.hide()
         self._history_container.hide()
         self._catalog_container.hide()
+        
+        self._catalog_container.setLayout(CatalogLayout(self))
+        self._cart_container.setLayout(CartLayout(self))
+        self.show_catalog()
 
     def _connect_signals(self):
         self._logo_btn.clicked.connect(self.show_overlay)
         self._catalog_btn.clicked.connect(self.show_catalog)
         self._cart_btn.clicked.connect(self.show_cart)
 
-    def _render_layout(self, new_layout):
-        curr_layout = self._main_container.layout()
-        if curr_layout is not None:
-            clear_layout(curr_layout)
-            QWidget().setLayout(curr_layout)
-        self._main_container.setLayout(new_layout)
-
     def show_catalog(self):
         self._curr_page = self._catalog_container
         self._show_curr_page()
         if self._catalog_container.layout() is None:
             self._catalog_container.setLayout(CatalogLayout(self))
-    
+        # Перераспределяем элементы, если в процессе работы в другой вкладке
+        # был изменён размер окна
+        self._catalog_container.layout().resize_catalog()
+
     def show_cart(self):
         self._curr_page = self._cart_container
-        self._catalog_container.layout().resize_catalog()
         self._show_curr_page()
         if self._cart_container.layout() is None:
             self._cart_container.setLayout(CartLayout(self))
         else:
-            self._cart_container.layout().full_update()
+            self._cart_container.layout().full_ui_update()
+
+    # Для возможности внешнего доступа
+    def set_cart_number(self, number):
+        self._cart_btn.setText(f"[{number}]")
     
-    def get_cart_data(self, response_handler):
-        url = "http://127.0.0.1:8000/api/v1/order"
-        headers = {
-            "token": session.token,
-        }
-
-        thread = RequestThread(method="GET", url=url, headers=headers)
-        session.threads.append(thread)
-        thread.finished.connect(response_handler)
-        thread.start()
-
-    def update_cart_number_handler(self, response, thread):
-        if thread in session.threads:
-            session.threads.remove(thread)
-
-        if isinstance(response, Exception):
-            show_error_window()
+    # Для обновления корзиныпри добавлении товара изокна
+    def update_cart(self):
+        if self._curr_page == self._cart_container:
+            self._cart_container.layout().full_ui_update()
         else:
-            response_dict = json.loads(response.text)
-            if "success" in response_dict:
-                if response_dict["success"]:
-                    amount = normalize_cart_data(response_dict["data"])["all_amount"]
-                    self._cart_btn.setText(f"[{amount}]")
-                else:
-                    self._cart_btn.setText("[0]")
-            else:
-                show_error_window()
-                
-    def update_cart_number(self):
-        self.get_cart_data(self.update_cart_number_handler)
+            self._cart_container.layout().cart_number_update()
+            
 
     def _show_curr_page(self):
         for page in [
@@ -223,6 +206,7 @@ class MainWindow(QWidget):
 
     def resizeEvent(self, event):
         self._overlay.resize()
+        # Применяем перераспределение элементов только когда видно каталог
         if self._curr_page == self._catalog_container:
             self._catalog_container.layout().resize_catalog()
         super().resizeEvent(event)
