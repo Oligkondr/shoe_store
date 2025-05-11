@@ -27,8 +27,9 @@ class OverlayMessageWidget(QLabel):
         self.message.setAlignment(Qt.AlignCenter)
         self.message.setFixedHeight(50)
         self.message.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        add_class(self.message, "small-text")
         
-        self.message_window.setFixedWidth(250)
+        self.message_window.setFixedWidth(230)
         
         self._close_btn.setText("Закрыть")
         add_class(self._close_btn, "main-btn")
@@ -40,7 +41,7 @@ class OverlayMessageWidget(QLabel):
         
         
         message_layout = QVBoxLayout()
-        message_layout.setContentsMargins(30, 19, 30, 20)
+        message_layout.setContentsMargins(20, 19, 20, 20)
         message_layout.setSpacing(0)
         
         message_layout.addWidget(self.message)

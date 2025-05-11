@@ -299,13 +299,17 @@ class ItemWindow(QWidget):
             if "success" in response_dict:
                 if response_dict["success"]:
                     added_products = normalize_cart_data(response_dict["data"])["products"]
+                    not_in_cart = True
                     for product_data in added_products:
                         if product_data["product_size_id"] == self._curr_size.item_id:
-                            self._overlay.hide()
-                            self._overlay_message.show()
-                            return
-                        else:
-                            self._add_product()     
+                            not_in_cart = False
+                    if not_in_cart:
+                        self._add_product()  
+                    else:
+                        self._overlay.hide()
+                        self._overlay_message.message.setFixedHeight(70)
+                        self._overlay_message.message.setText("Вы уже добавили этот товар. Перейдите в корзину, чтобы изменить его количество.")
+                        self._overlay_message.show()
                 else:
                     self._add_product()
             else:
@@ -314,7 +318,6 @@ class ItemWindow(QWidget):
 
 
     def _add_product(self):
-        print("yes")
         url = "http://127.0.0.1:8000/api/v1/product"
         headers = {
             "token": session.token,
@@ -341,10 +344,10 @@ class ItemWindow(QWidget):
             response_dict = json.loads(response.text)
             if "success" in response_dict:
                 self._overlay.hide()
+                self._overlay_message.message.setFixedHeight(50)
+                self._overlay_message.message.setText("Товар успешно добавлен в корзину!")
                 self._overlay_message.show()
-                #!!!!
-                # Cart update request
-                #!!!
+                session.curr_window.update_cart_number()
             else:
                 show_error_window()
 

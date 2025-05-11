@@ -58,6 +58,7 @@ def normalize_cart_data(data_dict):
     result = {
         "price": data_dict["price"],
         "products": [],
+        "all_amount": 0
     }
     for product in data_dict["order_products"]:
         product_data= {
@@ -72,6 +73,7 @@ def normalize_cart_data(data_dict):
             "price": product["price"],
         }
         result["products"].append(product_data)
+        result["all_amount"] += product_data["amount"]
     return result
 
 example = {

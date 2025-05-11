@@ -19,10 +19,12 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QColor, QIcon, QResizeEvent
 
-from ..utils import get_absolute_path, clear_layout, add_class
+from ..utils import get_absolute_path, clear_layout, add_class, show_error_window, normalize_cart_data
 from ..layouts import CatalogLayout, CartLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
 from session import session
+from ..classes import RequestThread
+import json
 
 
 class MainWindow(QWidget):
@@ -47,7 +49,8 @@ class MainWindow(QWidget):
         self._init_ui()
         self._connect_signals()
         self.show_catalog()
-
+        self.update_cart_number()
+    
     def _init_ui(self):
         # Подключение файла стилей
         style_file_path = get_absolute_path(__file__, "../styles/main_style.qss")
@@ -161,9 +164,43 @@ class MainWindow(QWidget):
     
     def show_cart(self):
         self._curr_page = self._cart_container
+        self._catalog_container.layout().resize_catalog()
         self._show_curr_page()
         if self._cart_container.layout() is None:
             self._cart_container.setLayout(CartLayout(self))
+        else:
+            self._cart_container.layout().full_update()
+    
+    def get_cart_data(self, response_handler):
+        url = "http://127.0.0.1:8000/api/v1/order"
+        headers = {
+            "token": session.token,
+        }
+
+        thread = RequestThread(method="GET", url=url, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(response_handler)
+        thread.start()
+
+    def update_cart_number_handler(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    amount = normalize_cart_data(response_dict["data"])["all_amount"]
+                    self._cart_btn.setText(f"[{amount}]")
+                else:
+                    self._cart_btn.setText("[0]")
+            else:
+                show_error_window()
+                
+    def update_cart_number(self):
+        self.get_cart_data(self.update_cart_number_handler)
 
     def _show_curr_page(self):
         for page in [

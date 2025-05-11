@@ -86,34 +86,31 @@ class CartLayout(QVBoxLayout):
         
         sublabel = QLabel()
         sublabel.setText("Итоговая цена")
+        sublabel.setContentsMargins(0,0,1,0)
         add_class(sublabel, "small-text")
 
         self._final_price.setText(format_price(0, 0))
         add_class(self._final_price, "title-text")
         
+        final_text_layout = QVBoxLayout()
+        final_text_layout.setContentsMargins(0,0,0,0)
+        final_text_layout.setSpacing(0)
+        final_text_layout.setAlignment(Qt.AlignRight)
+        final_text_layout.addSpacing(4)
+        final_text_layout.addWidget(sublabel, alignment=Qt.AlignRight)
+        final_text_layout.addWidget(self._final_price)
+        
         self._confirm_btn.setText("Оформить заказ")
         add_class(self._confirm_btn, "main-btn", "main-btn_solid")
-        self._confirm_btn.setFixedHeight(40)
+        self._confirm_btn.setFixedSize(200, 43)
         self._confirm_btn.setCursor(Qt.PointingHandCursor)
         self._confirm_btn.setDisabled(True)
         
-        final_layout = QVBoxLayout()
+        final_layout = QHBoxLayout()
         final_layout.setContentsMargins(0,0,0,0)
         final_layout.setSpacing(0)
-        final_layout.addWidget(sublabel, alignment=Qt.AlignRight)
-        final_layout.addWidget(self._final_price, alignment=Qt.AlignRight)
-        final_layout.addSpacing(21)
-        final_layout.addWidget(self._confirm_btn)
-        
-        final_container = QWidget()
-        final_container.setFixedWidth(200)
-        final_container.setLayout(final_layout)
-        
-        cart_data_layout = QHBoxLayout()
-        cart_data_layout.setContentsMargins(0,0,0,0)
-        cart_data_layout.setSpacing(30)
-        cart_data_layout.addWidget(items_container)
-        cart_data_layout.addWidget(final_container, alignment=Qt.AlignTop)
+        final_layout.addWidget(self._confirm_btn, alignment=Qt.AlignLeft)
+        final_layout.addLayout(final_text_layout, 1)
         
         ui_layout = QVBoxLayout()
         ui_layout.setContentsMargins(0,0,0,0)
@@ -121,10 +118,13 @@ class CartLayout(QVBoxLayout):
         ui_layout.setAlignment(Qt.AlignTop)
         ui_layout.addWidget(title)
         ui_layout.addLayout(history_btn_layout)
-        ui_layout.addSpacing(30)
-        ui_layout.addLayout(cart_data_layout)
+        ui_layout.addSpacing(17)
+        ui_layout.addLayout(final_layout)
+        ui_layout.addSpacing(21)
+        ui_layout.addWidget(items_container)
         
         ui_container = QWidget()
+        ui_container.setFixedWidth(600)
         ui_container.setLayout(ui_layout)
         
         centering_layout = QHBoxLayout()
@@ -138,10 +138,13 @@ class CartLayout(QVBoxLayout):
         
         self.addWidget(scroll_area)
 
-        self._get_items()
-
+        self._get_items_full_update()
     
-    def _get_items(self):
+    # Для внешнего вызова
+    def full_update(self):
+        self._get_items_full_update()
+    
+    def _get_items_full_update(self):
         self._parent_window.show_overlay()
 
         url = "http://127.0.0.1:8000/api/v1/order"
@@ -163,7 +166,6 @@ class CartLayout(QVBoxLayout):
             self._parent_window.hide_overlay()
         else:
             response_dict = json.loads(response.text)
-            print (response_dict)
             if "success" in response_dict:
                 if response_dict["success"]:
                     self._data = normalize_cart_data(response_dict["data"])
@@ -211,6 +213,8 @@ class CartLayout(QVBoxLayout):
                 for item_data in self._data["products"]:
                     widget = CartItemWidget(item_data)
                     self._items_layout.addWidget(widget)
+                self._final_price.setText(format_price(self._data["price"], self._data["price"]))
+                self._confirm_btn.setDisabled(False)
         
     def _update_price(self):
         pass
@@ -218,30 +222,5 @@ class CartLayout(QVBoxLayout):
         
     def _open_catalog(self):
         self._parent_window.show_catalog()
-
-    # def _init_items_ui(self):
-    #     columns = (self._scroll_area.viewport().width() - 40) // 210
-    #     if columns != self._curr_columns:
-    #         self._curr_columns = columns
-    #         if self._items_layout is not None:
-    #             clear_layout(self._items_layout)
-                        
-    #             title = QLabel()
-    #             title.setText("КАТАЛОГ")
-    #             add_class(title, "title-text")
-    #             title.setFixedHeight(34)
-                
-    #             self._items_layout.addWidget(title, 0, 0)
-    #             if self._data is not None:
-    #                 for i, model_data in enumerate(self._data.values()):
-    #                     widget = CatalogItemWidget(model_data)
-    #                     row = i // self._curr_columns + 1
-    #                     column = i % self._curr_columns
-    #                     self._items_layout.addWidget(widget, row, column)
-    #                 if len(self._data) < self._curr_columns:
-    #                     self._items_layout.setColumnStretch(len(self._data), 1)
-    #                 self._items_layout.setRowStretch(
-    #                     ((len(self._data) - 1) // self._curr_columns) + 2, 1
-    #                 )
 
         

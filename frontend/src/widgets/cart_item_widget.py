@@ -10,8 +10,10 @@ from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt, QSize
 
 from ..widgets import ClickableWidget, OverlayWidget
-from ..utils import get_absolute_path, add_class, format_price
+from ..utils import get_absolute_path, add_class, format_price, show_error_window
+from ..classes import RequestThread
 from session import session
+import json
 
 example = {
     "item_id": 10,
@@ -37,6 +39,7 @@ class CartItemWidget(QWidget):
         self._item_size = data["size"]
         self._item_amount = data["amount"]
         self._item_price = data["price"]
+        self._item_product_size_id = data["product_size_id"]
 
         self._title_btn = QPushButton()
         self._plus_btn = QPushButton()
@@ -44,13 +47,14 @@ class CartItemWidget(QWidget):
         self._amount_label = QLabel()
         self._delete_btn = QPushButton()
         self._price_label = QLabel()
+        self._amount_input_container = QWidget()
         
 
         self._init_ui()
         self._connect_signals()
 
     def _init_ui(self):
-        self.setFixedSize(500, 150)
+        self.setFixedSize(600, 150)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -77,8 +81,8 @@ class CartItemWidget(QWidget):
         size.setText(f"Размер: {self._item_size}")
         add_class(size, "catalog-item-text")
 
-        amount_input = QWidget()
-        amount_input.setFixedSize(110, 32)
+        self._amount_input_container = QWidget()
+        self._amount_input_container.setFixedSize(110, 32)
 
         self._minus_btn.setFixedSize(32, 32)
         self._minus_btn.setIcon(
@@ -106,7 +110,7 @@ class CartItemWidget(QWidget):
         amount_input_layout.addWidget(self._amount_label, 1)
         amount_input_layout.addWidget(self._plus_btn)
 
-        amount_input.setLayout(amount_input_layout)
+        self._amount_input_container.setLayout(amount_input_layout)
 
         layout1 = QVBoxLayout()
         layout1.setContentsMargins(0, 12, 0, 20)
@@ -116,7 +120,7 @@ class CartItemWidget(QWidget):
         layout1.addWidget(color)
         layout1.addWidget(size)
         layout1.addStretch(1)
-        layout1.addWidget(amount_input)
+        layout1.addWidget(self._amount_input_container)
 
         add_class(self._price_label, "catalog-item-price")
 
@@ -156,17 +160,13 @@ class CartItemWidget(QWidget):
     def _plus_btn_handler(self):
         self._item_amount += 1
         self._update_ui()
-        # !!!
-        # Отправляем запрос
-        # !!!
+        self._update_item_amount()
         
     def _minus_btn_handler(self):
         self._item_amount -= 1
         self._update_ui()
-        # !!!
-        # Отправляем запрос
-        # !!!
-    
+        self._update_item_amount()
+ 
     def _delete_btn_handler(self):
         pass
         # !!!
@@ -174,6 +174,48 @@ class CartItemWidget(QWidget):
         # Прозрачной для событий мыши
         # Послеуспешного запроса просто скрываем hide()
         # !!!
+        
+    def _update_item_amount(self):
+        self._amount_input_container.setAttribute(Qt.WA_TransparentForMouseEvents, True)
+        
+        url = f"http://127.0.0.1:8000/api/v1/product/{self._item_id}"
+        headers = {
+            "token": session.token,
+        }
+        data = {
+            "new_quantity": self._item_amount,
+        }
+        data_json = json.dumps(data)
+
+        thread = RequestThread(method="PATCH", url=url, headers=headers, data=data_json)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_update_item_amount_response)
+        thread.start()
+
+    def _handle_update_item_amount_response(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._overlay.hide()
+        else:
+            print(response.text)
+            response_dict = json.loads(response.text)
+            print(response_dict)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    pass
+                    # products = response_dict["data"]["products"]
+                    # self._data = normalize_item_page_data(products)
+                    # self._init_model_ui()
+                else:
+                    show_error_window()
+            else:
+                show_error_window()
+
+        self._amount_input_container.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+        
 
     def _update_btns(self):
         if self._item_amount == 1:
