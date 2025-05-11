@@ -9,11 +9,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtCore import Qt, QSize
 
-from ..widgets import ClickableWidget, OverlayWidget
+import json
+
 from ..utils import get_absolute_path, add_class, format_price, show_error_window
 from ..classes import RequestThread
 from session import session
-import json
 
 example = {
     "item_id": 10,
@@ -28,8 +28,10 @@ example = {
 
 
 class CartItemWidget(QWidget):
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent_layout, parent=None):
         super().__init__(parent)
+
+        self._parent_layout = parent_layout
 
         self._item_id = data["item_id"]
         self._item_model_name = data["model_name"]
@@ -48,7 +50,7 @@ class CartItemWidget(QWidget):
         self._delete_btn = QPushButton()
         self._price_label = QLabel()
         self._amount_input_container = QWidget()
-        
+        self._overlay = QWidget()
 
         self._init_ui()
         self._connect_signals()
@@ -142,42 +144,72 @@ class CartItemWidget(QWidget):
         layout.addLayout(layout2, 1)
 
         self.setLayout(layout)
-        
+
+        self._overlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+        self._overlay.setStyleSheet("background-color: rgba(255, 255, 255, 127)")
+        self._overlay.setGeometry(0, 0, self.width(), self.height())
+        self._overlay.hide()
+        self._overlay.setParent(self)
+
         self._update_ui()
 
     def _connect_signals(self):
         self._plus_btn.clicked.connect(self._plus_btn_handler)
         self._minus_btn.clicked.connect(self._minus_btn_handler)
-        self._delete_btn.clicked.connect(self._delete_btn_handler)
+        self._delete_btn.clicked.connect(self._delete_item)
         self._title_btn.clicked.connect(self._open_item_page)
-        
+
     def _update_ui(self):
         new_price = self._item_amount * self._item_price
         self._price_label.setText(format_price(new_price, new_price))
         self._amount_label.setText(str(self._item_amount))
         self._update_btns()
-    
+
     def _plus_btn_handler(self):
         self._item_amount += 1
         self._update_ui()
         self._update_item_amount()
-        
+
     def _minus_btn_handler(self):
         self._item_amount -= 1
         self._update_ui()
         self._update_item_amount()
- 
-    def _delete_btn_handler(self):
-        pass
-        # !!!
-        # Делаем полупрозрачной
-        # Прозрачной для событий мыши
-        # Послеуспешного запроса просто скрываем hide()
-        # !!!
-        
+
+    def _delete_item(self):
+        self._overlay.show()
+        url = f"http://127.0.0.1:8000/api/v1/product/{self._item_id}"
+        headers = {
+            "token": session.token,
+        }
+
+        thread = RequestThread(method="DELETE", url=url, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_delete_item_response)
+        thread.start()
+
+    def _handle_delete_item_response(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._overlay.hide()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    self._parent_layout.price_ui_update()
+                    self.hide()
+                else:
+                    show_error_window()
+            else:
+                show_error_window()
+
+        self._overlay.hide()
+
     def _update_item_amount(self):
         self._amount_input_container.setAttribute(Qt.WA_TransparentForMouseEvents, True)
-        
+
         url = f"http://127.0.0.1:8000/api/v1/product/{self._item_id}"
         headers = {
             "token": session.token,
@@ -200,37 +232,42 @@ class CartItemWidget(QWidget):
             show_error_window()
             self._overlay.hide()
         else:
-            print(response.text)
             response_dict = json.loads(response.text)
             if "success" in response_dict:
                 if response_dict["success"]:
-                    pass
-                    # products = response_dict["data"]["products"]
-                    # self._data = normalize_item_page_data(products)
-                    # self._init_model_ui()
+                    self._parent_layout.price_ui_update()
                 else:
                     show_error_window()
             else:
                 show_error_window()
 
-        self._amount_input_container.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-        
+        self._amount_input_container.setAttribute(
+            Qt.WA_TransparentForMouseEvents, False
+        )
 
     def _update_btns(self):
         if self._item_amount == 1:
             self._minus_btn.setDisabled(True)
-            self._minus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/minus_grey.png")))
+            self._minus_btn.setIcon(
+                QIcon(get_absolute_path(__file__, "../icons/minus_grey.png"))
+            )
         elif self._item_amount == 10:
             self._plus_btn.setDisabled(True)
-            self._plus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/plus_grey.png")))
+            self._plus_btn.setIcon(
+                QIcon(get_absolute_path(__file__, "../icons/plus_grey.png"))
+            )
         else:
             self._minus_btn.setDisabled(False)
-            self._minus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/minus.png")))
+            self._minus_btn.setIcon(
+                QIcon(get_absolute_path(__file__, "../icons/minus.png"))
+            )
             self._plus_btn.setDisabled(False)
-            self._plus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/plus.png")))
-    
+            self._plus_btn.setIcon(
+                QIcon(get_absolute_path(__file__, "../icons/plus.png"))
+            )
+
     def _open_item_page(self):
         from ..windows import ItemWindow
-        window = ItemWindow(self._item_model_id, self._item_variation_id)
 
+        window = ItemWindow(self._item_model_id, self._item_variation_id)
         window.show()

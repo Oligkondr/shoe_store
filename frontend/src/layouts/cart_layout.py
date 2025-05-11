@@ -225,7 +225,7 @@ class CartLayout(QVBoxLayout):
 
             else:
                 for item_data in self._data["products"]:
-                    widget = CartItemWidget(item_data)
+                    widget = CartItemWidget(item_data, self)
                     self._items_layout.addWidget(widget)
 
             self._parent_window.hide_overlay()
