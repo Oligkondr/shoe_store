@@ -47,22 +47,6 @@ class ClientPayResponse(BaseModel):
     success: bool
 
 
-class ApprovedOrderResponse(BaseModel):
-    id: int
-    client_id: int
-    approved_at: datetime
-    status_id: int
-    price: int
-
-
-class ActiveOrderResponse(BaseModel):
-    id: int
-    client_id: int
-    approved_at: None
-    status_id: int
-    price: int
-
-
 class CategoryResponse(BaseModel):
     id: int
     name: str
@@ -127,12 +111,48 @@ class ProductResponse(BaseModel):
     model_color: ModelColorResponse
 
 
+class OrderProductForOrderResponse(BaseModel):
+    id: int
+    price: int
+    quantity: int
+
+    product_size: ProductSizeResponse
+
+
+class ApprovedOrderResponse(BaseModel):
+    id: int
+    client_id: int
+    approved_at: datetime
+    status_id: int
+    price: int
+
+    order_products: list[OrderProductForOrderResponse]
+
+
+class ActiveOrderForOrderProductResponse(BaseModel):
+    id: int
+    client_id: int
+    approved_at: None
+    status_id: int
+    price: int
+
+
+class ActiveOrderResponse(BaseModel):
+    id: int
+    client_id: int
+    approved_at: None
+    status_id: int
+    price: int
+
+    order_products: list[OrderProductForOrderResponse]
+
+
 class OrderProductResponse(BaseModel):
     id: int
     price: int
     quantity: int
 
-    order: ActiveOrderResponse
+    order: ActiveOrderForOrderProductResponse
     product_size: ProductSizeResponse
 
 

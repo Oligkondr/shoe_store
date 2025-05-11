@@ -17,12 +17,12 @@ from app.responses import UserLoginResponse, ClientResponse, ResponseModel, Orde
 clients_router = APIRouter(prefix="/api/v1", tags=["Client"])
 
 
-@clients_router.get('/test', summary='Test get request')
-def test(request: Request):
-    params = request.query_params
-    params_dict = dict(params)
-    model = params_dict['model']
-    return model
+# @clients_router.get('/test', summary='Test get request')
+# def test(request: Request):
+#     params = request.query_params
+#     params_dict = dict(params)
+#     model = params_dict['model']
+#     return model
 
 
 @clients_router.get('/orders', summary='Get client approved orders', response_model=ResponseModel[OrdersResponse])
@@ -138,9 +138,7 @@ def login_client(client: UserAuthRequest):
     return ResponseModel[UserLoginResponse](success=True, data=UserLoginResponse(token=access_token))
 
 
-@clients_router.post('/product', summary='Add product to order',
-                     response_model=ResponseModel[OrderProductResponse]
-                     )
+@clients_router.post('/product', summary='Add product to order', response_model=ResponseModel[OrderProductResponse])
 def add_product(data: ClientProductRequest, client: Client = Depends(get_current_client)):
     with session_maker() as session:
         order_obj = client.get_or_create_current_order()
@@ -148,8 +146,8 @@ def add_product(data: ClientProductRequest, client: Client = Depends(get_current
         product_size_obj = session.get(ProductSize, data.id)
 
         new_order_product = OrderProduct(
-            product_size=product_size_obj,
-            order=order_obj,
+            product_size_id=product_size_obj.id,
+            order_id=order_obj.id,
             quantity=data.quantity,
             price=product_size_obj.product.price,
         )

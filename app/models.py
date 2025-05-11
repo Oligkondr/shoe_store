@@ -66,7 +66,7 @@ class Order(Base):
     client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
     status_id: Mapped[int] = mapped_column(SmallInteger)
     price: Mapped[int] = mapped_column(server_default=text("0"))
-    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True, server_default="NULL")
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
     client = relationship("Client", back_populates="orders")
     order_products = relationship("OrderProduct", back_populates="order")
@@ -95,7 +95,7 @@ class Order(Base):
 
 
 class OrderProduct(Base):
-    product_id: Mapped[int] = mapped_column(ForeignKey('product_sizes.id'))
+    product_size_id: Mapped[int] = mapped_column(ForeignKey('product_sizes.id'))
     order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'))
     quantity: Mapped[int] = mapped_column(SmallInteger)
     price: Mapped[int] = mapped_column(server_default=text("0"))
