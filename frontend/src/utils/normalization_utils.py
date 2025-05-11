@@ -25,7 +25,6 @@ def normalize_catalog_products(products_list):
 
 
 def normalize_item_page_data(variations_list):
-    print(variations_list)
     model = {
         "id": variations_list[0]["model_color"]["model"]["id"],
         "name": variations_list[0]["model_color"]["model"]["name"],
@@ -49,4 +48,7 @@ def normalize_item_page_data(variations_list):
             model["variations"][id]["sizes"].append(
                 {"product_id": size["id"], "value": size["size"]["ru"]}
             )
+        model["variations"][id]["sizes"] = sorted(
+            model["variations"][id]["sizes"], key=lambda d: float(d["value"])
+        )
     return model

@@ -164,3 +164,15 @@ QScrollBar::sub-line:horizontal {
 .transparent-background {
     background-color: rgba(0, 0, 0, 50)
 }
+
+.amount-input-btn {
+    border: 1px solid #dcdcdc;
+}
+.amount-input-btn:hover {
+    border-color: #000000;
+}
+
+.amount-input {
+    border-top: 1px solid #dcdcdc;
+    border-bottom: 1px solid #dcdcdc;
+}

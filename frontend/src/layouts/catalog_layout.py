@@ -54,6 +54,7 @@ class CatalogLayout(QVBoxLayout):
         self.setSpacing(0)
 
         self._scroll_area.setWidgetResizable(True)
+        self._scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self._items_layout.setContentsMargins(0, 0, 0, 0)
         self._items_layout.setHorizontalSpacing(20)

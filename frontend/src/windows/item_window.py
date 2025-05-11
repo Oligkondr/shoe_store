@@ -115,7 +115,7 @@ class ItemWindow(QWidget):
         self._add_btn.setFixedHeight(40)
         self._add_btn.setCursor(Qt.PointingHandCursor)
         self._add_btn.setDisabled(True)
-        self._add_btn.clicked.connect(self._add_btn_handler)
+        self._add_btn.clicked.connect(self._add_product)
         self._add_btn.hide()
 
         ui_layout = QVBoxLayout()
@@ -281,7 +281,42 @@ class ItemWindow(QWidget):
         else:
             self._curr_size.setChecked(False)
             self._curr_size = sender
+            
+    def _add_product(self):    
+        self._overlay.show()
 
+        url = "http://127.0.0.1:8000/api/v1/product"
+        headers = {
+            "token": session.token,
+        }
+        data = {
+            "id": self._curr_size.item_id,
+            "quantity": 1,
+        }
+        data_json = json.dumps(data)
+        
+        thread = RequestThread(method="POST", url=url, data=data_json, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_add_product_response)
+        thread.start()
+
+    def _handle_add_product_response(self, response, thread):
+        if thread in session.threads: 
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._overlay.hide()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                self._overlay.hide()
+                self._overlay_message.show()
+            else:
+                show_error_window()
+
+        self._overlay.hide()
+    
     def _add_btn_handler(self):
         self._overlay_message.show()
 
