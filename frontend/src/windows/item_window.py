@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
     QScrollArea,
 )
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 
 from ..widgets import OverlayWidget, ShoeSizeBtnWidget, ModelVariationBtnWidget, OverlayMessageWidget
 from ..utils import get_absolute_path, show_error_window, add_class, clear_layout, normalize_item_page_data
@@ -89,7 +90,6 @@ class ItemWindow(QWidget):
         layout.setSpacing(0)
 
         self._image_container.setFixedSize(390, 390)
-        self._image_container.setStyleSheet("background-color: black")
 
         add_class(self._category_label, "small-text")
 
@@ -201,9 +201,12 @@ class ItemWindow(QWidget):
         for var_id in self._data["variations"]:
             widget = ModelVariationBtnWidget()
             widget.variation_id = var_id
-            # !!!
-            # Добавить картинку для виджета
-            # !!!
+            pixmap = QPixmap(
+                get_absolute_path(__file__, f"../images/{var_id}.png")
+            )
+            widget.image.setPixmap(
+                pixmap.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            )
             widget.setStyleSheet("border: 1px solid #dcdcdc")
             widget.clicked.connect(self._variation_btn_handler)
             self._variation_btns.append(widget)
@@ -261,6 +264,14 @@ class ItemWindow(QWidget):
 
         self._price_label.setText(
             self._data["variations"][self._curr_variation]["price"]
+        )
+        
+        image_id = self._curr_variation
+        pixmap = QPixmap(
+            get_absolute_path(__file__, f"../images/{image_id}.png")
+        )
+        self._image_container.setPixmap(
+            pixmap.scaled(390, 390, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
 
     def _variation_btn_handler(self):

@@ -25,8 +25,9 @@ class CatalogItemWidget(ClickableWidget):
         layout.setSpacing(0)
 
         image_container = QLabel()
+        image_id = self._item_data["id"]
         pixmap = QPixmap(
-            get_absolute_path(__file__, "../images/item_placeholder.png")
+            get_absolute_path(__file__, f"../images/{image_id}.png")
         )
         image_container.setPixmap(
             pixmap.scaled(190, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)

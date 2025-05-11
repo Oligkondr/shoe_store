@@ -121,11 +121,10 @@ class CatalogLayout(QVBoxLayout):
                 clear_layout(self._items_layout)
                         
                 title = QLabel()
-                title.setText("КАТАЛОГ")
                 add_class(title, "title-text")
                 title.setFixedHeight(34)
-                
                 self._items_layout.addWidget(title, 0, 0)
+
                 if self._data is not None:
                     for i, model_data in enumerate(self._data.values()):
                         widget = CatalogItemWidget(model_data)
@@ -137,6 +136,8 @@ class CatalogLayout(QVBoxLayout):
                     self._items_layout.setRowStretch(
                         ((len(self._data) - 1) // self._curr_columns) + 2, 1
                     )
+                    title.setText("КАТАЛОГ")
+
 
     def resize_catalog(self):
         self._init_items_ui()
