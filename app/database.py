@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Annotated
 
 from sqlalchemy import func, create_engine, DateTime
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column, sessionmaker
