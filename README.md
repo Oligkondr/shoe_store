@@ -37,6 +37,10 @@ pip install -r requirements.txt
 ```
 cd frontend | python main.py
 ```
+или
+```
+python3 ./frontend/main.py
+```
 
 ___
 **Документация по api(Swagger UI):**
