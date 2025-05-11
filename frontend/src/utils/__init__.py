@@ -18,7 +18,7 @@ from .validation_utils import (
     validate_registration_password,
     validate_registration_password2,
 )
-from .normalization_utils import normalize_catalog_products, normalize_item_page_data
+from .normalization_utils import normalize_catalog_products, normalize_item_page_data, normalize_cart_data
 from .formatting_utils import format_colors_amount, format_price
 
 __all__ = [
@@ -42,4 +42,5 @@ __all__ = [
     "format_colors_amount",
     "format_price",
     "normalize_item_page_data",
+    "normalize_cart_data",
 ]

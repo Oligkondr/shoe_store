@@ -26,7 +26,7 @@ example = {
 
 
 class CartItemWidget(QWidget):
-    def __init__(self, data=example, parent=None):
+    def __init__(self, data, parent=None):
         super().__init__(parent)
 
         self._item_id = data["item_id"]

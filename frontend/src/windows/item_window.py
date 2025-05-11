@@ -10,43 +10,27 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 
-from ..widgets import OverlayWidget, ShoeSizeBtnWidget, ModelVariationBtnWidget, OverlayMessageWidget
-from ..utils import get_absolute_path, show_error_window, add_class, clear_layout, normalize_item_page_data
+from ..widgets import (
+    OverlayWidget,
+    ShoeSizeBtnWidget,
+    ModelVariationBtnWidget,
+    OverlayMessageWidget,
+)
+from ..utils import (
+    get_absolute_path,
+    show_error_window,
+    add_class,
+    clear_layout,
+    normalize_item_page_data,
+    normalize_cart_data,
+)
 from ..classes import RequestThread
 import json
 from session import session
 
-example = {
-    "id": 0,
-    "name": "Топовые тяги",
-    "category": "Кроссовки",
-    "description": "Топ за свои деньги. Чел, такой бич, как ты, всё равно ничего лучше позволить не сможет.",
-    "variations": {
-        0: {
-            "name": "Закат твоей карьеры",
-            "price": "1 000 Р",
-            "colors": ["ffffff", "000000"],
-            "sizes": [
-                {"product_id": 0, "value": "36"},
-                {"product_id": 2, "value": "39"},
-                {"product_id": 12, "value": "40"},
-            ],
-        },
-        4: {
-            "name": "Она просто хотела денег",
-            "price": "2 000 Р",
-            "colors": ["ffff00", "ff0000", "ffffff"],
-            "sizes": [
-                {"product_id": 0, "value": "35"},
-                {"product_id": 2, "value": "37"},
-            ],
-        },
-    },
-}
-
 
 class ItemWindow(QWidget):
-    def __init__(self, model_id, curr_variation = None):
+    def __init__(self, model_id, curr_variation=None):
         super().__init__()
 
         # Добавляем окно в отслеживаемые
@@ -115,7 +99,7 @@ class ItemWindow(QWidget):
         self._add_btn.setFixedHeight(40)
         self._add_btn.setCursor(Qt.PointingHandCursor)
         self._add_btn.setDisabled(True)
-        self._add_btn.clicked.connect(self._add_product)
+        self._add_btn.clicked.connect(self._get_cart_data)
         self._add_btn.hide()
 
         ui_layout = QVBoxLayout()
@@ -151,7 +135,7 @@ class ItemWindow(QWidget):
         layout.addWidget(scroll_area)
 
         self.setLayout(layout)
-        
+
         self._overlay_message.message.setText("Товар успешно добавлен в корзину!")
         self._overlay_message.setParent(self)
         self._overlay_message.resize()
@@ -159,21 +143,21 @@ class ItemWindow(QWidget):
         self._overlay.setParent(self)
         self._overlay.resize()
 
-    def _get_model_data(self):    
+    def _get_model_data(self):
         self._overlay.show()
 
         url = f"http://127.0.0.1:8000/api/v1/products?model_id={self._model_id}"
         headers = {
             "token": session.token,
         }
-        
+
         thread = RequestThread(method="GET", url=url, headers=headers)
         session.threads.append(thread)
         thread.finished.connect(self._handle_get_model_data_response)
         thread.start()
 
     def _handle_get_model_data_response(self, response, thread):
-        if thread in session.threads: 
+        if thread in session.threads:
             session.threads.remove(thread)
 
         if isinstance(response, Exception):
@@ -201,9 +185,7 @@ class ItemWindow(QWidget):
         for var_id in self._data["variations"]:
             widget = ModelVariationBtnWidget()
             widget.variation_id = var_id
-            pixmap = QPixmap(
-                get_absolute_path(__file__, f"../images/{var_id}.png")
-            )
+            pixmap = QPixmap(get_absolute_path(__file__, f"../images/{var_id}.png"))
             widget.image.setPixmap(
                 pixmap.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             )
@@ -266,11 +248,9 @@ class ItemWindow(QWidget):
         self._price_label.setText(
             self._data["variations"][self._curr_variation]["price"]
         )
-        
+
         image_id = self._curr_variation
-        pixmap = QPixmap(
-            get_absolute_path(__file__, f"../images/{image_id}.png")
-        )
+        pixmap = QPixmap(get_absolute_path(__file__, f"../images/{image_id}.png"))
         self._image_container.setPixmap(
             pixmap.scaled(390, 390, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
@@ -293,10 +273,48 @@ class ItemWindow(QWidget):
         else:
             self._curr_size.setChecked(False)
             self._curr_size = sender
-            
-    def _add_product(self):    
+
+    def _get_cart_data(self):
         self._overlay.show()
 
+        url = "http://127.0.0.1:8000/api/v1/order"
+        headers = {
+            "token": session.token,
+        }
+
+        thread = RequestThread(method="GET", url=url, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_get_cart_data_response)
+        thread.start()
+
+    def _handle_get_cart_data_response(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    added_products = normalize_cart_data(response_dict["data"])["products"]
+                    for product_data in added_products:
+                        if product_data["product_size_id"] == self._curr_size.item_id:
+                            self._overlay.hide()
+                            self._overlay_message.show()
+                            return
+                        else:
+                            self._add_product()     
+                else:
+                    self._add_product()
+            else:
+                show_error_window()
+                self._overlay.hide()
+
+
+    def _add_product(self):
+        print("yes")
         url = "http://127.0.0.1:8000/api/v1/product"
         headers = {
             "token": session.token,
@@ -306,14 +324,14 @@ class ItemWindow(QWidget):
             "quantity": 1,
         }
         data_json = json.dumps(data)
-        
+
         thread = RequestThread(method="POST", url=url, data=data_json, headers=headers)
         session.threads.append(thread)
         thread.finished.connect(self._handle_add_product_response)
         thread.start()
 
     def _handle_add_product_response(self, response, thread):
-        if thread in session.threads: 
+        if thread in session.threads:
             session.threads.remove(thread)
 
         if isinstance(response, Exception):
@@ -324,11 +342,14 @@ class ItemWindow(QWidget):
             if "success" in response_dict:
                 self._overlay.hide()
                 self._overlay_message.show()
+                #!!!!
+                # Cart update request
+                #!!!
             else:
                 show_error_window()
 
         self._overlay.hide()
-    
+
     def _add_btn_handler(self):
         self._overlay_message.show()
 

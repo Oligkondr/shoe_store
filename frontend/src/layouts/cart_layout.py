@@ -28,6 +28,8 @@ from ..utils import (
     validate_login_password,
     clear_layout,
     show_error_window,
+    format_price,
+    normalize_cart_data,
 )
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget, CartItemWidget
 from ..classes import RequestThread
@@ -38,14 +40,13 @@ class CartLayout(QVBoxLayout):
         super().__init__()
         
         self._parent_window = parent_window
-                
-        self._items = [1, 2]
+
+        self._data = None
 
         self._items_layout = QVBoxLayout()
         self._confirm_btn = QPushButton()
         self._history_btn = QPushButton()
         self._final_price = QLabel()
-        self._final_amount = QLabel()
         
         self._init_ui()
 
@@ -83,10 +84,11 @@ class CartLayout(QVBoxLayout):
         items_container = QWidget()
         items_container.setLayout(self._items_layout)
         
-        self._final_amount.setText("Всего товаров: 0")
-        add_class(self._final_amount, "small-text")
+        sublabel = QLabel()
+        sublabel.setText("Итоговая цена")
+        add_class(sublabel, "small-text")
 
-        self._final_price.setText("0 Р")
+        self._final_price.setText(format_price(0, 0))
         add_class(self._final_price, "title-text")
         
         self._confirm_btn.setText("Оформить заказ")
@@ -98,8 +100,8 @@ class CartLayout(QVBoxLayout):
         final_layout = QVBoxLayout()
         final_layout.setContentsMargins(0,0,0,0)
         final_layout.setSpacing(0)
-        final_layout.addWidget(self._final_amount, alignment=Qt.AlignLeft)
-        final_layout.addWidget(self._final_price, alignment=Qt.AlignLeft)
+        final_layout.addWidget(sublabel, alignment=Qt.AlignRight)
+        final_layout.addWidget(self._final_price, alignment=Qt.AlignRight)
         final_layout.addSpacing(21)
         final_layout.addWidget(self._confirm_btn)
         
@@ -109,7 +111,7 @@ class CartLayout(QVBoxLayout):
         
         cart_data_layout = QHBoxLayout()
         cart_data_layout.setContentsMargins(0,0,0,0)
-        cart_data_layout.setSpacing(40)
+        cart_data_layout.setSpacing(30)
         cart_data_layout.addWidget(items_container)
         cart_data_layout.addWidget(final_container, alignment=Qt.AlignTop)
         
@@ -136,8 +138,8 @@ class CartLayout(QVBoxLayout):
         
         self.addWidget(scroll_area)
 
-        self._update_ui()
         self._get_items()
+
     
     def _get_items(self):
         self._parent_window.show_overlay()
@@ -161,15 +163,13 @@ class CartLayout(QVBoxLayout):
             self._parent_window.hide_overlay()
         else:
             response_dict = json.loads(response.text)
+            print (response_dict)
             if "success" in response_dict:
                 if response_dict["success"]:
-                    print (response_dict)
-                    # self._data = normalize_catalog_products(products)
-                    # self._init_items_ui()
-
+                    self._data = normalize_cart_data(response_dict["data"])
                 else:
-                    show_error_window()
-                    self._parent_window.hide_overlay()
+                    self._data = { "price": 0, "products": []}
+                self._update_ui()
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
@@ -177,9 +177,9 @@ class CartLayout(QVBoxLayout):
         self._parent_window.hide_overlay()
         
     def _update_ui(self):
-        if self._items_layout is not None:
+        if self._items_layout is not None and self._data is not None:
             clear_layout(self._items_layout)
-            if self._items is None or len(self._items) == 0:
+            if self._data["products"] is None or len(self._data["products"]) == 0:
                 label = QLabel("Вы пока не добавили ни одного товара")
                 add_class(label, "small-text")
                 
@@ -189,7 +189,6 @@ class CartLayout(QVBoxLayout):
                 add_class(btn, "small-btn")
                 btn.setCursor(Qt.PointingHandCursor)
                 btn.clicked.connect(self._open_catalog)
-
                 
                 message_layout = QVBoxLayout()
                 message_layout.setContentsMargins(0,0,0,0)
@@ -205,9 +204,12 @@ class CartLayout(QVBoxLayout):
                 
                 self._items_layout.addWidget(message_container)
                 
+                self._final_price.setText(format_price(0, 0))
+                self._confirm_btn.setDisabled(True)
+                
             else:
-                for i in range(10):
-                    widget = CartItemWidget()
+                for item_data in self._data["products"]:
+                    widget = CartItemWidget(item_data)
                     self._items_layout.addWidget(widget)
         
     def _update_price(self):
