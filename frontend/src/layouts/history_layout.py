@@ -33,7 +33,7 @@ from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget, CartIte
 from ..classes import RequestThread
 
 
-class CartLayout(QVBoxLayout):
+class HistoryLayout(QVBoxLayout):
     def __init__(self, parent_window):
         super().__init__()
         

@@ -6,6 +6,8 @@ from .shoe_size_btn_widget import ShoeSizeBtnWidget
 from .model_variation_btn_widget import ModelVariationBtnWidget
 from .overlay_message_widget import OverlayMessageWidget
 from .cart_item_widget import CartItemWidget
+from .accordeon_widget import AccordeonWidget
+from .history_item_widget import HistoryItemWidget
 
 __all__ = [
     "ClickableWidget",
@@ -16,4 +18,6 @@ __all__ = [
     "ModelVariationBtnWidget",
     "OverlayMessageWidget",
     "CartItemWidget",
+    "AccordeonWidget",
+    "HistoryItemWidget",
 ]

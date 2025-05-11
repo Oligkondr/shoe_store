@@ -15,9 +15,10 @@ from session import session
 
 example = {
     "item_id": 10,
-    "model": "Топовые тяги",
-    "color": "Закат твтоей карьеры",
-    "variation_id": 5,
+    "model_name": "Топовые тяги",
+    "model_id": 2,
+    "variation_name": "Закат твтоей карьеры",
+    "variation_id": 2,
     "size": "41",
     "amount": 1,
     "price": 1000,
@@ -29,9 +30,10 @@ class CartItemWidget(QWidget):
         super().__init__(parent)
 
         self._item_id = data["item_id"]
-        self._item_model = data["model"]
-        self._item_color = data["color"]
-        self._item_variation = data["variation_id"]
+        self._item_model_name = data["model_name"]
+        self._item_model_id = data["model_id"]
+        self._item_variation_name = data["variation_name"]
+        self._item_variation_id = data["variation_id"]
         self._item_size = data["size"]
         self._item_amount = data["amount"]
         self._item_price = data["price"]
@@ -43,33 +45,32 @@ class CartItemWidget(QWidget):
         self._delete_btn = QPushButton()
         self._price_label = QLabel()
         
-        self._overlay = OverlayWidget()
 
         self._init_ui()
         self._connect_signals()
 
     def _init_ui(self):
-        self.setFixedSize(520, 150)
+        self.setFixedSize(500, 150)
 
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 20, 0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(20)
 
         image_container = QLabel()
         image_container.setFixedSize(150, 150)
         pixmap = QPixmap(
-            get_absolute_path(__file__, f"../images/{self._item_variation}.png")
+            get_absolute_path(__file__, f"../images/{self._item_variation_id}.png")
         )
         image_container.setPixmap(
             pixmap.scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
 
-        self._title_btn.setText(self._item_model)
+        self._title_btn.setText(self._item_model_name)
         add_class(self._title_btn, "catalog-item-price")
         self._title_btn.setCursor(Qt.PointingHandCursor)
 
         color = QLabel()
-        color.setText(self._item_color)
+        color.setText(self._item_variation_name)
         add_class(color, "catalog-item-text")
 
         size = QLabel()
@@ -117,7 +118,6 @@ class CartItemWidget(QWidget):
         layout1.addStretch(1)
         layout1.addWidget(amount_input)
 
-
         add_class(self._price_label, "catalog-item-price")
 
         self._delete_btn.setText("Удалить")
@@ -139,15 +139,13 @@ class CartItemWidget(QWidget):
 
         self.setLayout(layout)
         
-        self._overlay.setParent(self)
-        self._overlay.resize()
-
         self._update_ui()
 
     def _connect_signals(self):
         self._plus_btn.clicked.connect(self._plus_btn_handler)
         self._minus_btn.clicked.connect(self._minus_btn_handler)
         self._delete_btn.clicked.connect(self._delete_btn_handler)
+        self._title_btn.clicked.connect(self._open_item_page)
         
     def _update_ui(self):
         new_price = self._item_amount * self._item_price
@@ -170,7 +168,12 @@ class CartItemWidget(QWidget):
         # !!!
     
     def _delete_btn_handler(self):
-        self._overlay.show()
+        pass
+        # !!!
+        # Делаем полупрозрачной
+        # Прозрачной для событий мыши
+        # Послеуспешного запроса просто скрываем hide()
+        # !!!
 
     def _update_btns(self):
         if self._item_amount == 1:
@@ -184,3 +187,9 @@ class CartItemWidget(QWidget):
             self._minus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/minus.png")))
             self._plus_btn.setDisabled(False)
             self._plus_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/plus.png")))
+    
+    def _open_item_page(self):
+        from ..windows import ItemWindow
+        window = ItemWindow(self._item_model_id, self._item_variation_id)
+
+        window.show()

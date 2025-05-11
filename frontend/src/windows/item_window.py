@@ -46,7 +46,7 @@ example = {
 
 
 class ItemWindow(QWidget):
-    def __init__(self, model_id=0):
+    def __init__(self, model_id, curr_variation = None):
         super().__init__()
 
         # Добавляем окно в отслеживаемые
@@ -54,7 +54,7 @@ class ItemWindow(QWidget):
 
         self._model_id = model_id
         self._data = None
-        self._curr_variation = None
+        self._curr_variation = curr_variation
         self._curr_size = None
 
         self._variation_btns = []
@@ -219,7 +219,8 @@ class ItemWindow(QWidget):
         if len(self._variation_btns) < 5:
             self._colors_grid.setColumnStretch(len(self._variation_btns), 1)
 
-        self._curr_variation = self._variation_btns[0].variation_id
+        if self._curr_variation is None:
+            self._curr_variation = self._variation_btns[0].variation_id
 
         self._update_variation_ui()
         self._add_btn.show()

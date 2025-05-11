@@ -136,8 +136,8 @@ class CatalogLayout(QVBoxLayout):
                     self._items_layout.setRowStretch(
                         ((len(self._data) - 1) // self._curr_columns) + 2, 1
                     )
+                    # Чтобы текст отображался только после загрузки всех остальных элементов
                     title.setText("КАТАЛОГ")
-
 
     def resize_catalog(self):
         self._init_items_ui()
