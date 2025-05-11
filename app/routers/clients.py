@@ -194,7 +194,7 @@ def change_product_quantity(id: int, data: NewQuantityRequest, client: Client = 
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Такого продукта нет к корзине')
 
         if order_obj.id == order_product.order_id:
-            order_product.quantity = data.quantity
+            order_product.quantity = data.new_quantity
             session.commit()
 
             order_obj.update_price()
