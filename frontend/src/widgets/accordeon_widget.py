@@ -55,6 +55,7 @@ class AccordeonWidget(QWidget):
             QIcon(get_absolute_path(__file__, "../icons/down.png"))
         )
         self._arrow_icon.setIconSize(QSize(20, 20))
+        self._arrow_icon.setAttribute(Qt.WA_TransparentForMouseEvents, True)
 
         header_layout = QHBoxLayout()
         header_layout.setContentsMargins(0, 0, 0, 0)
