@@ -34,8 +34,10 @@ class OrderWindow(QWidget):
             style = file.read()
             self.setStyleSheet(style)
 
-        self.setFixedWidth(350)
-        self.setMinimumHeight(350)
+        self.setFixedWidth(380)
+        self.setMinimumHeight(180)
+        n = len(self._order_items)
+        self.resize(380, min(400, 94 + 64 * n + 10 * (n - 1) + 30))
 
         title = QLabel()
         title.setText(f"Заказ #{self._order_id}")
@@ -62,7 +64,7 @@ class OrderWindow(QWidget):
 
         for item_data in self._order_items:
             widget = HistoryItemWidget(item_data)
-            widget.setFixedWidth(340)
+            widget.setFixedWidth(370)
             items_layout.addWidget(widget, alignment=Qt.AlignTop)
         items_layout.addStretch(1)
 

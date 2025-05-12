@@ -117,7 +117,8 @@ class MainWindow(QWidget):
         window_layout.addWidget(self._history_container)
 
         self.setLayout(window_layout)
-        self.setMinimumSize(800, 500)
+        self.setMinimumSize(700, 400)
+        self.resize(910, 600)
 
         self._overlay.setParent(self)
 
@@ -132,7 +133,7 @@ class MainWindow(QWidget):
     def _connect_signals(self):
         self._catalog_btn.clicked.connect(self.show_catalog)
         self._cart_btn.clicked.connect(self.show_cart)
-        self._logo_btn.clicked.connect(self._logout)
+        self._logout_btn.clicked.connect(self._logout)
 
     def show_catalog(self):
         self._curr_page = self._catalog_container

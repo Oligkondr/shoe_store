@@ -186,9 +186,11 @@ class LoginFormLayout(QVBoxLayout):
         self._login_error.hide()
         self._parent_window.show_overlay()
 
+        session.login_email = self._inputs[self._InputName.EMAIL].text().lower()
+
         url = "http://127.0.0.1:8000/api/v1/login"
         data = {
-            "email": self._inputs[self._InputName.EMAIL].text(),
+            "email": self._inputs[self._InputName.EMAIL].text().lower(),
             "password": self._inputs[self._InputName.PASSWORD].text(),
         }
         data_json = json.dumps(data)
