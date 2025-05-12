@@ -22,11 +22,10 @@ class MainWindow(QWidget):
         self._catalog_btn = QPushButton()
         self._search_btn = QPushButton()
         self._cart_btn = QPushButton()
-        self._account_btn = QPushButton()
+        self._logout_btn = QPushButton()
 
         self._catalog_container = QWidget()
         self._cart_container = QWidget()
-        self._account_container = QWidget()
         self._history_container = QWidget()
 
         self._curr_page = None
@@ -73,12 +72,12 @@ class MainWindow(QWidget):
         self._cart_btn.setIcon(QIcon(get_absolute_path(__file__, "../icons/cart.png")))
         self._cart_btn.setIconSize(QSize(18, 18))
 
-        self._account_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self._account_btn.setCursor(Qt.PointingHandCursor)
-        self._account_btn.setIcon(
-            QIcon(get_absolute_path(__file__, "../icons/account.png"))
+        self._logout_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self._logout_btn.setCursor(Qt.PointingHandCursor)
+        self._logout_btn.setIcon(
+            QIcon(get_absolute_path(__file__, "../icons/exit.png"))
         )
-        self._account_btn.setIconSize(QSize(16, 16))
+        self._logout_btn.setIconSize(QSize(16, 16))
 
         separators = []
         for i in range(2):
@@ -96,7 +95,7 @@ class MainWindow(QWidget):
         header_layout.addSpacing(20)
         header_layout.addWidget(self._cart_btn)
         header_layout.addSpacing(20)
-        header_layout.addWidget(self._account_btn)
+        header_layout.addWidget(self._logout_btn)
         header_layout.addSpacing(20)
 
         header = QWidget()
@@ -115,7 +114,6 @@ class MainWindow(QWidget):
         window_layout.addWidget(header_underline, alignment=Qt.AlignTop)
         window_layout.addWidget(self._catalog_container)
         window_layout.addWidget(self._cart_container)
-        window_layout.addWidget(self._account_container)
         window_layout.addWidget(self._history_container)
 
         self.setLayout(window_layout)
@@ -124,7 +122,6 @@ class MainWindow(QWidget):
         self._overlay.setParent(self)
 
         self._cart_container.hide()
-        self._account_container.hide()
         self._history_container.hide()
         self._catalog_container.hide()
 
@@ -135,6 +132,7 @@ class MainWindow(QWidget):
     def _connect_signals(self):
         self._catalog_btn.clicked.connect(self.show_catalog)
         self._cart_btn.clicked.connect(self.show_cart)
+        self._logo_btn.clicked.connect(self._logout)
 
     def show_catalog(self):
         self._curr_page = self._catalog_container
@@ -178,13 +176,20 @@ class MainWindow(QWidget):
         for page in [
             self._catalog_container,
             self._cart_container,
-            self._account_container,
             self._history_container,
         ]:
             if page == self._curr_page:
                 page.show()
             else:
                 page.hide()
+    
+    def _logout(self):
+        session.token = None
+        from ..windows import LoginWindow
+
+        session.curr_window = LoginWindow()
+        session.curr_window.show()
+        self.close()
 
     def show_overlay(self):
         self._overlay.resize()
