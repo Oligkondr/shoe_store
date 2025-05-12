@@ -35,7 +35,11 @@ def format_time_string(str):
         "11": "ноября",
         "12": "декабря",
     }
-    date_time = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%f")
+    date_time = None
+    if str[-1] == "Z":
+        date_time = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%fZ")
+    else:
+        date_time = datetime.strptime(str, "%Y-%m-%dT%H:%M:%S.%f")
     formatted_parts = date_time.strftime("%d %m %Y %H:%M").split(" ")
     formatted_parts[1] = month_dict[formatted_parts[1]]
     return " ".join(formatted_parts)

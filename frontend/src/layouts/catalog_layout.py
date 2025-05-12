@@ -1,36 +1,23 @@
 from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
-    QLineEdit,
-    QPushButton,
     QVBoxLayout,
     QHBoxLayout,
-    QSizePolicy,
     QScrollArea,
     QGridLayout,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QByteArray, QUrl
-from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PyQt5.QtCore import Qt
 
-from enum import Enum
-import requests
 import json
 
 from session import session
-
 from ..utils import (
-    get_absolute_path,
     add_class,
-    remove_class,
-    toggle_class,
-    validate_login_email,
-    validate_login_password,
     clear_layout,
     show_error_window,
     normalize_catalog_products,
 )
-from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget
+from ..widgets import CatalogItemWidget
 from ..classes import RequestThread
 
 
@@ -119,7 +106,7 @@ class CatalogLayout(QVBoxLayout):
             self._curr_columns = columns
             if self._items_layout is not None:
                 clear_layout(self._items_layout)
-                        
+
                 title = QLabel()
                 add_class(title, "title-text")
                 title.setFixedHeight(34)

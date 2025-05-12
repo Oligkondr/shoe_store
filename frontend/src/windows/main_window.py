@@ -1,36 +1,17 @@
 from PyQt5.QtWidgets import (
     QWidget,
-    QApplication,
-    QLabel,
-    QLineEdit,
     QPushButton,
-    QStackedWidget,
-    QFormLayout,
     QVBoxLayout,
     QHBoxLayout,
-    QSpacerItem,
-    QHBoxLayout,
-    QGraphicsDropShadowEffect,
-    QFrame,
-    QGridLayout,
-    QScrollArea,
     QSizePolicy,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer
-from PyQt5.QtGui import QColor, QIcon, QResizeEvent
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon
 
-from ..utils import (
-    get_absolute_path,
-    clear_layout,
-    add_class,
-    show_error_window,
-    normalize_order_data,
-)
-from ..layouts import CatalogLayout, CartLayout
-from ..widgets import OverlayWidget, CatalogItemWidget
+from ..utils import get_absolute_path, add_class
+from ..layouts import CatalogLayout, CartLayout, HistoryLayout
+from ..widgets import OverlayWidget
 from session import session
-from ..classes import RequestThread
-import json
 
 
 class MainWindow(QWidget):
@@ -72,7 +53,7 @@ class MainWindow(QWidget):
 
         self._logo_btn.setFixedWidth(59)
         self._logo_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        #self._logo_btn.setCursor(Qt.PointingHandCursor)
+        # self._logo_btn.setCursor(Qt.PointingHandCursor)
         self._logo_btn.setIcon(
             QIcon(get_absolute_path(__file__, "../icons/logo_small.png"))
         )
@@ -146,7 +127,7 @@ class MainWindow(QWidget):
         self._account_container.hide()
         self._history_container.hide()
         self._catalog_container.hide()
-        
+
         self._catalog_container.setLayout(CatalogLayout(self))
         self._cart_container.setLayout(CartLayout(self))
         self.show_catalog()
@@ -174,17 +155,24 @@ class MainWindow(QWidget):
             self._cart_container.layout().full_ui_update()
         self.setWindowTitle("Корзина")
 
+    def show_history(self):
+        self._curr_page = self._history_container
+        self._show_curr_page()
+        if self._history_container.layout() is None:
+            self._history_container.setLayout(HistoryLayout(self))
+        self._history_container.layout().ui_update()
+        self.setWindowTitle("История заказов")
+
     # Для возможности внешнего доступа
     def set_cart_number(self, number):
         self._cart_btn.setText(f"[{number}]")
-    
+
     # Для обновления корзиныпри добавлении товара изокна
     def update_cart(self):
         if self._curr_page == self._cart_container:
             self._cart_container.layout().full_ui_update()
         else:
             self._cart_container.layout().cart_number_update()
-            
 
     def _show_curr_page(self):
         for page in [

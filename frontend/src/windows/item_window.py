@@ -279,7 +279,7 @@ class ItemWindow(QWidget):
         else:
             self._curr_size.setChecked(False)
             self._curr_size = sender
-            
+
     def _start_product_adding(self):
         self._get_cart_data()
 
@@ -312,7 +312,10 @@ class ItemWindow(QWidget):
                     ]
                     not_in_cart = True
                     for product_data in added_products:
-                        if product_data["product_size_id"] == self._curr_size.product_size_id:
+                        if (
+                            product_data["product_size_id"]
+                            == self._curr_size.product_size_id
+                        ):
                             not_in_cart = False
                     if not_in_cart:
                         self._add_product()

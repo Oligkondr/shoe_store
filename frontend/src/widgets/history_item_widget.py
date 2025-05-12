@@ -6,12 +6,10 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
 )
-from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
-from ..widgets import ClickableWidget, OverlayWidget
-from ..utils import get_absolute_path, add_class, format_price
-from session import session
+from ..utils import get_absolute_path, add_class
 
 example = {
     "item_id": 10,
@@ -39,7 +37,6 @@ class HistoryItemWidget(QWidget):
         self._item_price = data["price"]
 
         self._title_btn = QPushButton()
-        
 
         self._init_ui()
         self._connect_signals()
@@ -66,7 +63,9 @@ class HistoryItemWidget(QWidget):
         self._title_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
 
         desc = QLabel()
-        desc.setText(f"{self._item_variation_name} • {self._item_size} • {self._item_amount} шт.")
+        desc.setText(
+            f"{self._item_variation_name} • {self._item_size} • {self._item_amount} шт."
+        )
         add_class(desc, "catalog-item-text")
 
         layout1 = QVBoxLayout()
@@ -82,9 +81,10 @@ class HistoryItemWidget(QWidget):
 
     def _connect_signals(self):
         self._title_btn.clicked.connect(self._open_item_page)
-    
+
     def _open_item_page(self):
         from ..windows import ItemWindow
+
         window = ItemWindow(self._item_model_id, self._item_variation_id)
 
         window.show()

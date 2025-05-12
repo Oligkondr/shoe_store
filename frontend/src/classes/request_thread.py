@@ -2,14 +2,15 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import requests
 import traceback
 
+
 class RequestThread(QThread):
-    finished = pyqtSignal(object, object) 
+    finished = pyqtSignal(object, object)
 
     def __init__(self, method, url, **kwargs):
         super().__init__()
         self._method = method
         self._url = url
-        self._kwargs = kwargs 
+        self._kwargs = kwargs
 
     def run(self):
         try:

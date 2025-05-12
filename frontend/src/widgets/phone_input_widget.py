@@ -6,7 +6,7 @@ class PhoneInputWidget(QLineEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.textChanged.connect(self._on_text_changed)
-        
+
     # Перезапись поведения получения введённого текста из виджета
     # Возваращает только введённые цифры, а не весь отформатированный текст
     def text(self):

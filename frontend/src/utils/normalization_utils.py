@@ -69,6 +69,7 @@ def normalize_order_data(data_dict):
         "price": data_dict["price"],
         "products": [],
         "all_amount": 0,
+        "timestamp_time": data_dict["approved_at"],
     }
     if data_dict["approved_at"] is not None:
         result["approved_at"] = format_time_string(data_dict["approved_at"])

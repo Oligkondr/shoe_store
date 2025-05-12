@@ -30,7 +30,7 @@ def delete_widget(widget: QWidget):
 def replace_widget_in_layout(layout: QLayout, old_widget: QWidget, new_widget: QWidget):
     """
     Заменяет виджет в QLayout'е.
-    
+
     [ВАЖНО]
         old_widget должен находиться непосредственно в layout'е,
         иначе замены не произойдёт.
@@ -46,19 +46,22 @@ def replace_widget_in_layout(layout: QLayout, old_widget: QWidget, new_widget: Q
 
     layout.insertWidget(index, new_widget)
 
+
 def show_error_window():
     """
     Показывает универсальное всплывающее окно ошибки.
     """
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
-    msg.setText("Упс, что-то пошло не так...\nПожалуйста, повторите операцию. \n\nВ случае повторной ошибки\nперезагрузите приложение.")
+    msg.setText(
+        "Упс, что-то пошло не так...\nПожалуйста, повторите операцию. \n\nВ случае повторной ошибки\nперезагрузите приложение."
+    )
     msg.setWindowTitle("Ошибка")
-    msg.setStandardButtons(QMessageBox.Ok) 
+    msg.setStandardButtons(QMessageBox.Ok)
     button = msg.button(QMessageBox.Ok)
     button.setText("Понятно")
     msg.exec_()
-    
+
 
 # Имитация работы с СSS-классами, как в JS
 def add_class(widget: QWidget, *classes_to_add: str):

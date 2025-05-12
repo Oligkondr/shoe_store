@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QPushButton
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from ..widgets import ClickableWidget
 from ..utils import get_absolute_path, add_class
-from session import session
+
 
 class CatalogItemWidget(ClickableWidget):
     def __init__(self, item_data, parent=None):
@@ -26,9 +26,7 @@ class CatalogItemWidget(ClickableWidget):
 
         image_container = QLabel()
         image_id = self._item_data["id"]
-        pixmap = QPixmap(
-            get_absolute_path(__file__, f"../images/{image_id}.png")
-        )
+        pixmap = QPixmap(get_absolute_path(__file__, f"../images/{image_id}.png"))
         image_container.setPixmap(
             pixmap.scaled(190, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
@@ -40,11 +38,11 @@ class CatalogItemWidget(ClickableWidget):
 
         category = QLabel()
         category.setText(self._item_data["category"])
-        add_class(category, "catalog-item-text") 
-        
+        add_class(category, "catalog-item-text")
+
         colors = QLabel()
         colors.setText(self._item_data["colors_str"])
-        add_class(colors, "catalog-item-text") 
+        add_class(colors, "catalog-item-text")
 
         price = QLabel()
         price.setText(self._item_data["price_str"])
@@ -66,6 +64,7 @@ class CatalogItemWidget(ClickableWidget):
 
     def _open_item_page(self):
         from ..windows import ItemWindow
+
         window = ItemWindow(self._item_data["id"])
 
         window.show()

@@ -24,8 +24,8 @@ def validate_registration_email(str):
         return ValidationResult(False, "Неверный формат email")
     else:
         return ValidationResult(True)
-        
-            
+
+
 def validate_registration_name(str):
     if len(str.strip()) == 0:
         return ValidationResult(False, "Заполните поле")
@@ -68,8 +68,10 @@ def validate_registration_password(str):
         )
     elif not any(c.isdigit() for c in str):
         return ValidationResult(False, "Пароль должен содержать хотя бы одну цифру")
-    elif not any (c in " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~" for c in str):
-        return ValidationResult(False, "Пароль должен содержать хотя бы один специальный символ")
+    elif not any(c in " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~" for c in str):
+        return ValidationResult(
+            False, "Пароль должен содержать хотя бы один специальный символ"
+        )
     else:
         return ValidationResult(True)
 

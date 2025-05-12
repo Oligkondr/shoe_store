@@ -1,37 +1,25 @@
 from PyQt5.QtWidgets import (
     QWidget,
     QLabel,
-    QLineEdit,
     QPushButton,
     QVBoxLayout,
     QHBoxLayout,
     QSizePolicy,
     QScrollArea,
-    QGridLayout,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QByteArray, QUrl
-from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
+from PyQt5.QtCore import Qt
 
-from enum import Enum
-import requests
 import json
 
 from session import session
-
 from ..utils import (
-    get_absolute_path,
     add_class,
-    remove_class,
-    toggle_class,
-    validate_login_email,
-    validate_login_password,
     clear_layout,
     show_error_window,
     format_price,
     normalize_order_data,
 )
-from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget, CartItemWidget
+from ..widgets import CartItemWidget
 from ..classes import RequestThread
 
 
@@ -62,6 +50,7 @@ class CartLayout(QVBoxLayout):
         self._history_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         add_class(self._history_btn, "small-btn")
         self._history_btn.setCursor(Qt.PointingHandCursor)
+        self._history_btn.clicked.connect(self._parent_window.show_history)
 
         history_btn_icon = QLabel(" →")
         history_btn_icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
@@ -98,7 +87,7 @@ class CartLayout(QVBoxLayout):
         final_text_layout.setAlignment(Qt.AlignRight)
         final_text_layout.addSpacing(4)
         final_text_layout.addWidget(sublabel, alignment=Qt.AlignRight)
-        final_text_layout.addWidget(self._final_price)
+        final_text_layout.addWidget(self._final_price, alignment=Qt.AlignRight)
 
         self._confirm_btn.setText("Оформить заказ")
         add_class(self._confirm_btn, "main-btn", "main-btn_solid")
@@ -250,7 +239,7 @@ class CartLayout(QVBoxLayout):
     def _confirm_order(self):
         self._parent_window.show_overlay()
         self._deposit()
-    
+
     def _deposit(self):
         url = "http://127.0.0.1:8000/api/v1/deposit"
         headers = {
@@ -265,7 +254,7 @@ class CartLayout(QVBoxLayout):
         session.threads.append(thread)
         thread.finished.connect(self._handle_deposit_response)
         thread.start()
-        
+
     def _handle_deposit_response(self, response, thread):
         if thread in session.threads:
             session.threads.remove(thread)
@@ -284,7 +273,7 @@ class CartLayout(QVBoxLayout):
             else:
                 show_error_window()
                 self._parent_window.hide_overlay()
-        
+
     def _approve_order(self):
         url = "http://127.0.0.1:8000/api/v1/approve"
         headers = {
@@ -305,7 +294,6 @@ class CartLayout(QVBoxLayout):
             self._parent_window.hide_overlay()
         else:
             response_dict = json.loads(response.text)
-            print(response_dict)
             if "success" in response_dict:
                 if response_dict["success"]:
                     order_data = normalize_order_data(response_dict["data"])

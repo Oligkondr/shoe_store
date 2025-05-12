@@ -1,31 +1,14 @@
 from PyQt5.QtWidgets import (
-    QWidget,
     QLabel,
-    QLineEdit,
     QPushButton,
     QVBoxLayout,
     QHBoxLayout,
     QSizePolicy,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QByteArray, QUrl
-from PyQt5.QtGui import QIcon
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
-
-from enum import Enum
-import requests
-import json
+from PyQt5.QtCore import Qt
 
 from session import session
-
-from ..utils import (
-    get_absolute_path,
-    add_class,
-    remove_class,
-    toggle_class,
-    validate_login_email,
-    validate_login_password,
-)
-from ..widgets import ClickableWidget, OverlayWidget
+from ..utils import add_class
 
 
 class SuccessRegistrationLayout(QVBoxLayout):
