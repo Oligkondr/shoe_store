@@ -2,28 +2,28 @@ from pydantic import BaseModel, Field
 
 
 class AdminCreateRequest(BaseModel):
-    email: str
-    password: str
-    phone: str
-    name: str
-    surname: str
-    patronymic: str
-    is_super: bool
+    email: str = Field(..., description="Электронная почта")
+    password: str = Field(..., description="Пароль")
+    phone: str = Field(..., description="Номер телефона")
+    name: str = Field(..., description="Имя")
+    surname: str = Field(..., description="Фамилия")
+    patronymic: str = Field(..., description="Отчество")
+    is_super: bool = Field(..., description="Является ли админ супером")
 
 
 class ClientCreateRequest(BaseModel):
-    email: str
-    password: str
-    phone: str
-    name: str
-    surname: str
+    email: str = Field(..., description="Электронная почта")
+    password: str = Field(..., description="Пароль")
+    phone: str = Field(..., description="Номер телефона")
+    name: str = Field(..., description="Имя")
+    surname: str = Field(..., description="Фамилия")
 
 
 class ClientUpdateRequest(BaseModel):
-    email: str
-    phone: str
-    name: str
-    surname: str
+    email: str = Field(..., description="Электронная почта")
+    phone: str = Field(..., description="Номер телефона")
+    name: str = Field(..., description="Имя")
+    surname: str = Field(..., description="Фамилия")
 
 
 class UserAuthRequest(BaseModel):
@@ -32,13 +32,13 @@ class UserAuthRequest(BaseModel):
 
 
 class ClientProductRequest(BaseModel):
-    id: int
-    quantity: int
+    id: int = Field(..., description="Id product_size")
+    quantity: int = Field(..., description="Кол-во продукта")
 
 
 class ClientDepositRequest(BaseModel):
-    amount: int
+    amount: int = Field(..., description="Сумма пополнения")
 
 
 class NewQuantityRequest(BaseModel):
-    quantity: int
+    quantity: int = Field(..., description="Новое кол-во товара")
