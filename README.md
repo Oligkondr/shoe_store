@@ -1,11 +1,10 @@
 ## Участники проекта:
-Кондрашин Олег — Backend
-
-Шишов Михаил — Teamlead | Frontend
-
+Кондрашин Олег — Backend  
+Шишов Михаил — Teamlead | Frontend  
 Фаткулин Александр — Frontend
 
-[Презентация проекта](https://docs.google.com/presentation/d/e/2PACX-1vR71YDftdE4JyDjTp0RTta_bF6j2IOql9ZRqYEp-037a0occjwHvk1QAMTmEWpkkNvUaziLqgIHllzU/pub?start=false&loop=false&delayms=3000)
+[Презентация проекта](https://docs.google.com/presentation/d/e/2PACX-1vR71YDftdE4JyDjTp0RTta_bF6j2IOql9ZRqYEp-037a0occjwHvk1QAMTmEWpkkNvUaziLqgIHllzU/pub?start=false&loop=false&delayms=3000)  
+[Демонстрация работы приложения](https://drive.google.com/file/d/1FahEzB4D8M_u3B-54XsEzmFPFdcy6ctV/view?usp=drive_link)
 
 # Подготовка:
 
