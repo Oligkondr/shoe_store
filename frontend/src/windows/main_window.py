@@ -24,7 +24,7 @@ from ..utils import (
     clear_layout,
     add_class,
     show_error_window,
-    normalize_cart_data,
+    normalize_order_data,
 )
 from ..layouts import CatalogLayout, CartLayout
 from ..widgets import OverlayWidget, CatalogItemWidget
@@ -72,7 +72,7 @@ class MainWindow(QWidget):
 
         self._logo_btn.setFixedWidth(59)
         self._logo_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self._logo_btn.setCursor(Qt.PointingHandCursor)
+        #self._logo_btn.setCursor(Qt.PointingHandCursor)
         self._logo_btn.setIcon(
             QIcon(get_absolute_path(__file__, "../icons/logo_small.png"))
         )
@@ -152,7 +152,6 @@ class MainWindow(QWidget):
         self.show_catalog()
 
     def _connect_signals(self):
-        self._logo_btn.clicked.connect(self.show_overlay)
         self._catalog_btn.clicked.connect(self.show_catalog)
         self._cart_btn.clicked.connect(self.show_cart)
 
@@ -164,6 +163,7 @@ class MainWindow(QWidget):
         # Перераспределяем элементы, если в процессе работы в другой вкладке
         # был изменён размер окна
         self._catalog_container.layout().resize_catalog()
+        self.setWindowTitle("Каталог")
 
     def show_cart(self):
         self._curr_page = self._cart_container
@@ -172,6 +172,7 @@ class MainWindow(QWidget):
             self._cart_container.setLayout(CartLayout(self))
         else:
             self._cart_container.layout().full_ui_update()
+        self.setWindowTitle("Корзина")
 
     # Для возможности внешнего доступа
     def set_cart_number(self, number):

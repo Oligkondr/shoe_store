@@ -45,7 +45,7 @@ class HistoryItemWidget(QWidget):
         self._connect_signals()
 
     def _init_ui(self):
-        self.setFixedSize(500, 64)
+        self.setFixedHeight(64)
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -57,24 +57,23 @@ class HistoryItemWidget(QWidget):
             get_absolute_path(__file__, f"../images/{self._item_variation_id}.png")
         )
         image_container.setPixmap(
-            pixmap.scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pixmap.scaled(64, 64, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )
 
         self._title_btn.setText(self._item_model_name)
         add_class(self._title_btn, "catalog-item-price")
         self._title_btn.setCursor(Qt.PointingHandCursor)
+        self._title_btn.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
 
         desc = QLabel()
         desc.setText(f"{self._item_variation_name} • {self._item_size} • {self._item_amount} шт.")
         add_class(desc, "catalog-item-text")
 
         layout1 = QVBoxLayout()
-        layout1.setContentsMargins(0, 12, 0, 20)
+        layout1.setContentsMargins(0, 7, 0, 0)
         layout1.setSpacing(0)
-        layout1.setAlignment(Qt.AlignLeft)
-        layout1.addWidget(self._title_btn)
-        layout1.addWidget(desc)
-
+        layout1.addWidget(self._title_btn, alignment=Qt.AlignTop)
+        layout1.addWidget(desc, alignment=Qt.AlignTop)
 
         layout.addWidget(image_container)
         layout.addLayout(layout1, 1)

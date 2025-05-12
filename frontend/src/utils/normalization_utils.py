@@ -1,4 +1,4 @@
-from .formatting_utils import format_colors_amount, format_price
+from .formatting_utils import format_colors_amount, format_price, format_time_string
 
 
 def normalize_catalog_products(products_list):
@@ -60,15 +60,20 @@ def normalize_item_page_data(variations_list):
     return model
 
 
-def normalize_cart_data(data_dict):
+def normalize_order_data(data_dict):
     """
-    Нормализует ответ от сервера для работы с корзиной.
+    Нормализует ответ от сервера при получении данных о заказе.
     """
     result = {
+        "id": data_dict["id"],
         "price": data_dict["price"],
         "products": [],
         "all_amount": 0,
     }
+    if data_dict["approved_at"] is not None:
+        result["approved_at"] = format_time_string(data_dict["approved_at"])
+    else:
+        result["approved_at"] = None
     for product in data_dict["order_products"]:
         product_data = {
             "item_id": product["id"],

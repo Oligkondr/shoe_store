@@ -29,7 +29,7 @@ from ..utils import (
     clear_layout,
     show_error_window,
     format_price,
-    normalize_cart_data,
+    normalize_order_data,
 )
 from ..widgets import ClickableWidget, OverlayWidget, CatalogItemWidget, CartItemWidget
 from ..classes import RequestThread
@@ -105,6 +105,7 @@ class CartLayout(QVBoxLayout):
         self._confirm_btn.setFixedSize(200, 43)
         self._confirm_btn.setCursor(Qt.PointingHandCursor)
         self._confirm_btn.setDisabled(True)
+        self._confirm_btn.clicked.connect(self._confirm_order)
 
         final_layout = QHBoxLayout()
         final_layout.setContentsMargins(0, 0, 0, 0)
@@ -185,7 +186,7 @@ class CartLayout(QVBoxLayout):
             response_dict = json.loads(response.text)
             if "success" in response_dict:
                 if response_dict["success"]:
-                    self._data = normalize_cart_data(response_dict["data"])
+                    self._data = normalize_order_data(response_dict["data"])
                 else:
                     self._data = {"price": 0, "products": [], "all_amount": 0}
                 execute_after_success()
@@ -245,6 +246,79 @@ class CartLayout(QVBoxLayout):
 
     def _update_cart_number(self):
         self._parent_window.set_cart_number(self._data["all_amount"])
+
+    def _confirm_order(self):
+        self._parent_window.show_overlay()
+        self._deposit()
+    
+    def _deposit(self):
+        url = "http://127.0.0.1:8000/api/v1/deposit"
+        headers = {
+            "token": session.token,
+        }
+        data = {
+            "amount": self._data["price"],
+        }
+        data_json = json.dumps(data)
+
+        thread = RequestThread(method="POST", url=url, data=data_json, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_deposit_response)
+        thread.start()
+        
+    def _handle_deposit_response(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            response_dict = json.loads(response.text)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    self._approve_order()
+                else:
+                    show_error_window()
+                    self._parent_window.hide_overlay()
+            else:
+                show_error_window()
+                self._parent_window.hide_overlay()
+        
+    def _approve_order(self):
+        url = "http://127.0.0.1:8000/api/v1/approve"
+        headers = {
+            "token": session.token,
+        }
+
+        thread = RequestThread(method="POST", url=url, headers=headers)
+        session.threads.append(thread)
+        thread.finished.connect(self._handle_approve_order_response)
+        thread.start()
+
+    def _handle_approve_order_response(self, response, thread):
+        if thread in session.threads:
+            session.threads.remove(thread)
+
+        if isinstance(response, Exception):
+            show_error_window()
+            self._parent_window.hide_overlay()
+        else:
+            response_dict = json.loads(response.text)
+            print(response_dict)
+            if "success" in response_dict:
+                if response_dict["success"]:
+                    order_data = normalize_order_data(response_dict["data"])
+                    from ..windows import OrderWindow
+
+                    window = OrderWindow(order_data)
+                    window.show()
+                else:
+                    show_error_window()
+            else:
+                show_error_window()
+        self._parent_window.hide_overlay()
+        self.full_ui_update()
 
     def _open_catalog(self):
         self._parent_window.show_catalog()

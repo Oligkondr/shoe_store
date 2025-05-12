@@ -115,9 +115,11 @@ class LoginWindow(QWidget):
         self._form_container.setLayout(new_layout)
 
     def show_registration_form(self):
+        self.setWindowTitle("Регистрация")
         self._render_form_layout(RegistrationFormLayout(self))
 
     def show_login_form(self):
+        self.setWindowTitle("Вход")
         self._render_form_layout(LoginFormLayout(self))
 
     def show_success_registration_message(self):

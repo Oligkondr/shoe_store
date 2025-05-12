@@ -22,7 +22,7 @@ from ..utils import (
     add_class,
     clear_layout,
     normalize_item_page_data,
-    normalize_cart_data,
+    normalize_order_data,
 )
 from ..classes import RequestThread
 import json
@@ -180,6 +180,7 @@ class ItemWindow(QWidget):
         self._overlay.hide()
 
     def _init_model_ui(self):
+        self.setWindowTitle(self._data["name"])
         self._category_label.setText(self._data["category"])
         self._title_label.setText(self._data["name"])
         self._description_label.setText(self._data["description"])
@@ -306,7 +307,7 @@ class ItemWindow(QWidget):
             response_dict = json.loads(response.text)
             if "success" in response_dict:
                 if response_dict["success"]:
-                    added_products = normalize_cart_data(response_dict["data"])[
+                    added_products = normalize_order_data(response_dict["data"])[
                         "products"
                     ]
                     not_in_cart = True

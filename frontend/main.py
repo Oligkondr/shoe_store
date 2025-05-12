@@ -1,7 +1,7 @@
 import sys
 from os import path, listdir
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtGui import QFontDatabase, QIcon
 
 from src.utils import get_absolute_path
 from src.windows import LoginWindow
@@ -10,6 +10,7 @@ from session import session
 if __name__ == "__main__":
     # Инициализация приложения
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(get_absolute_path(__file__, "./src/icons/logo_white.png")))
 
     # Загрузка шрифтов
     font_dir_path = get_absolute_path(__file__, "src/fonts")
