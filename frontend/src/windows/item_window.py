@@ -188,7 +188,7 @@ class ItemWindow(QWidget):
         for var_id in self._data["variations"]:
             widget = ModelVariationBtnWidget()
             widget.variation_id = var_id
-            pixmap = QPixmap(get_absolute_path(__file__, f"../images/{var_id}.png"))
+            pixmap = QPixmap(get_absolute_path(__file__, f"../images/small/{var_id}.jpg"))
             widget.image.setPixmap(
                 pixmap.scaled(60, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             )
@@ -256,7 +256,7 @@ class ItemWindow(QWidget):
         )
 
         image_id = self._curr_variation
-        pixmap = QPixmap(get_absolute_path(__file__, f"../images/{image_id}.png"))
+        pixmap = QPixmap(get_absolute_path(__file__, f"../images/full_size/{image_id}.jpg"))
         self._image_container.setPixmap(
             pixmap.scaled(390, 390, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         )

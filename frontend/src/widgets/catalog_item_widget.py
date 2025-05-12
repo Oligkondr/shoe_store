@@ -26,10 +26,8 @@ class CatalogItemWidget(ClickableWidget):
 
         image_container = QLabel()
         image_id = self._item_data["id"]
-        pixmap = QPixmap(get_absolute_path(__file__, f"../images/{image_id}.png"))
-        image_container.setPixmap(
-            pixmap.scaled(190, 190, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        )
+        pixmap = QPixmap(get_absolute_path(__file__, f"../images/small/{image_id}.jpg"))
+        image_container.setPixmap(pixmap)
 
         title = QLabel()
         title.setText(self._item_data["name"])

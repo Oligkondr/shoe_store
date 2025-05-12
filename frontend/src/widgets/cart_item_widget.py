@@ -65,7 +65,7 @@ class CartItemWidget(QWidget):
         image_container = QLabel()
         image_container.setFixedSize(150, 150)
         pixmap = QPixmap(
-            get_absolute_path(__file__, f"../images/{self._item_variation_id}.png")
+            get_absolute_path(__file__, f"../images/small/{self._item_variation_id}.jpg")
         )
         image_container.setPixmap(
             pixmap.scaled(150, 150, Qt.KeepAspectRatio, Qt.SmoothTransformation)
